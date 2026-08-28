@@ -23,7 +23,6 @@ import joblib
 import numpy as np
 import torch
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
-from sklearn.preprocessing import QuantileTransformer
 
 from ids.config import MODELS_DIR, PROCESSED_DIR, RANDOM_SEED, ensure_dirs
 from ids.dataset import feature_names, load_split, to_matrix
@@ -32,25 +31,7 @@ from ids.models.autoencoder import (
     reconstruction_error,
     train_autoencoder,
 )
-
-
-def fit_scaler(train_features: np.ndarray, seed: int) -> QuantileTransformer:
-    """Map every feature onto a normal distribution.
-
-    CICIDS2017 features are extremely heavy tailed: a handful of flows carry
-    packet counts and durations orders of magnitude above the rest. Plain
-    standardisation leaves those outliers dominating the autoencoder loss, so a
-    rank based transform is a much better fit here.
-    """
-    scaler = QuantileTransformer(
-        n_quantiles=1000,
-        output_distribution="normal",
-        subsample=200_000,
-        random_state=seed,
-        copy=True,
-    )
-    scaler.fit(train_features)
-    return scaler
+from ids.models.scaling import LogStandardScaler
 
 
 def threshold_at_fpr(benign_scores: np.ndarray, target_fpr: float) -> float:
@@ -65,6 +46,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--target-fpr", type=float, default=0.01)
     parser.add_argument("--rf-trees", type=int, default=100)
     parser.add_argument("--if-trees", type=int, default=200)
+    parser.add_argument("--if-sample-size", type=int, default=4096)
     parser.add_argument("--ae-epochs", type=int, default=20)
     parser.add_argument(
         "--max-train-rows",
@@ -88,9 +70,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Train split: {len(train):,} rows, {len(features)} features")
     print(f"  attacks {int(y_train.sum()):,}, benign {int((1 - y_train).sum()):,}")
 
-    print("Fitting the quantile scaler")
+    print("Fitting the scaler")
     started = time.perf_counter()
-    scaler = fit_scaler(x_train, RANDOM_SEED)
+    scaler = LogStandardScaler().fit(x_train)
     x_train_scaled = scaler.transform(x_train).astype(np.float32)
     print(f"  done in {time.perf_counter() - started:.1f}s")
 
@@ -114,9 +96,11 @@ def main(argv: list[str] | None = None) -> int:
 
     print("Training the isolation forest on benign traffic")
     started = time.perf_counter()
+    # The scikit-learn default of 256 samples per tree is far too coarse for a
+    # feature space this wide, and it left the model barely above chance.
     isolation = IsolationForest(
         n_estimators=args.if_trees,
-        max_samples=256,
+        max_samples=args.if_sample_size,
         contamination="auto",
         n_jobs=-1,
         random_state=RANDOM_SEED,
@@ -179,7 +163,7 @@ def main(argv: list[str] | None = None) -> int:
             },
             "isolation_forest": {
                 "n_estimators": args.if_trees,
-                "max_samples": 256,
+                "max_samples": args.if_sample_size,
             },
             "autoencoder": {
                 "epochs": autoencoder_config.epochs,

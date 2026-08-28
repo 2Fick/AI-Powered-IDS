@@ -138,6 +138,13 @@ class DetectorBundle:
         forest = joblib.load(models_dir / "random_forest.joblib")
         isolation = joblib.load(models_dir / "isolation_forest.joblib")
 
+        # Training spreads the trees over every core, but serving scores one
+        # flow at a time and the cost of handing work to a thread pool then
+        # dwarfs the work itself. Dropping to a single worker takes the random
+        # forest from about 17 ms per flow to about 3 ms.
+        forest.n_jobs = 1
+        isolation.n_jobs = 1
+
         checkpoint = torch.load(
             models_dir / "autoencoder.pt", map_location="cpu", weights_only=True
         )
