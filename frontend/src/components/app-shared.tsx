@@ -1,5 +1,14 @@
 import type { ReactNode } from "react";
-import { LayoutGridIcon, ListChecksIcon, BarChart3Icon, MessageSquareTextIcon, UsersIcon, PlugIcon, SettingsIcon, HelpCircleIcon, ActivityIcon } from "lucide-react";
+import {
+	ActivityIcon,
+	BookOpenIcon,
+	BrainIcon,
+	GaugeIcon,
+	CodeIcon,
+	LayoutGridIcon,
+	ShieldAlertIcon,
+	WavesIcon,
+} from "lucide-react";
 
 export type SidebarNavItem = {
 	title: string;
@@ -20,83 +29,41 @@ export const navGroups: SidebarNavGroup[] = [
 			{
 				title: "Overview",
 				path: "#/overview",
-				icon: (
-					<LayoutGridIcon
-					/>
-				),
+				icon: <LayoutGridIcon />,
 				isActive: true,
 			},
 		],
 	},
 	{
-		label: "Today",
+		label: "Live",
 		items: [
 			{
-				title: "Queue",
-				path: "#/queue",
-				icon: (
-					<ListChecksIcon
-					/>
-				),
+				title: "Alerts",
+				path: "#alerts",
+				icon: <ShieldAlertIcon />,
 			},
 			{
-				title: "Team insights",
-				path: "#/team-insights",
-				icon: (
-					<BarChart3Icon
-					/>
-				),
+				title: "Replay stream",
+				path: "#replay",
+				icon: <WavesIcon />,
 			},
 		],
 	},
 	{
-		label: "Inbox",
+		label: "Models",
 		items: [
 			{
-				title: "Conversations",
-				icon: (
-					<MessageSquareTextIcon
-					/>
-				),
+				title: "Comparison",
+				path: "#comparison",
+				icon: <GaugeIcon />,
+			},
+			{
+				title: "Detectors",
+				icon: <BrainIcon />,
 				subItems: [
-					{ title: "Unassigned", path: "#/inbox/unassigned" },
-					{ title: "Assigned to me", path: "#/inbox/assigned" },
-					{ title: "Recently closed", path: "#/inbox/closed" },
-				],
-			},
-			{
-				title: "Customers",
-				path: "#/customers",
-				icon: (
-					<UsersIcon
-					/>
-				),
-			},
-			{
-				title: "Channels",
-				path: "#/channels",
-				icon: (
-					<PlugIcon
-					/>
-				),
-			},
-		],
-	},
-	{
-		label: "Organization",
-		items: [
-			{
-				title: "Workspace",
-				icon: (
-					<SettingsIcon
-					/>
-				),
-				subItems: [
-					{ title: "Branding", path: "#/workspace/branding" },
-					{ title: "Team & roles", path: "#/workspace/team" },
-					{ title: "API keys", path: "#/workspace/api-keys" },
-					{ title: "Webhooks", path: "#/workspace/webhooks" },
-					{ title: "Billing", path: "#/workspace/billing" },
+					{ title: "Random Forest", path: "#random-forest" },
+					{ title: "Isolation Forest", path: "#isolation-forest" },
+					{ title: "Autoencoder", path: "#autoencoder" },
 				],
 			},
 		],
@@ -105,20 +72,19 @@ export const navGroups: SidebarNavGroup[] = [
 
 export const footerNavLinks: SidebarNavItem[] = [
 	{
-		title: "Help Center",
-		path: "#/help",
-		icon: (
-			<HelpCircleIcon
-			/>
-		),
+		title: "API docs",
+		path: "http://localhost:8000/docs",
+		icon: <BookOpenIcon />,
 	},
 	{
-		title: "System status",
-		path: "#/status",
-		icon: (
-			<ActivityIcon
-			/>
-		),
+		title: "Dataset",
+		path: "https://www.unb.ca/cic/datasets/ids-2017.html",
+		icon: <ActivityIcon />,
+	},
+	{
+		title: "Source",
+		path: "https://github.com/2Fick/ai-ids-project",
+		icon: <CodeIcon />,
 	},
 ];
 
