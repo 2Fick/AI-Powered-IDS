@@ -49,21 +49,18 @@ def download_file(client: httpx.Client, name: str, target_dir: Path) -> Path:
         print(f"  {name}: resuming at {already / 1e6:.0f} MB")
 
     downloaded = already if mode == "ab" else 0
+    milestone = 0
+    print(f"  {name}: {expected / 1e6:.0f} MB", end="", flush=True)
     with client.stream("GET", url, headers=headers, follow_redirects=True) as response:
         response.raise_for_status()
         with open(destination, mode) as handle:
             for chunk in response.iter_bytes(CHUNK_SIZE):
                 handle.write(chunk)
                 downloaded += len(chunk)
-                if expected:
-                    percent = 100 * downloaded / expected
-                    print(
-                        f"\r  {name}: {downloaded / 1e6:7.0f} / {expected / 1e6:.0f} MB"
-                        f" ({percent:5.1f}%)",
-                        end="",
-                        flush=True,
-                    )
-    print()
+                if expected and 100 * downloaded / expected >= milestone + 25:
+                    milestone += 25
+                    print(f" {milestone}%", end="", flush=True)
+    print(" done")
 
     final = destination.stat().st_size
     if expected and final != expected:
