@@ -49,6 +49,17 @@ CONSTANT_COLUMNS = [
 META_COLUMNS = ("attack_type", "is_attack", "capture_session")
 
 
+def normalise_label(label: str) -> str:
+    """Make an attack label plain ASCII.
+
+    The three web attack labels are written with a Windows code page dash that
+    breaks on any terminal or file that is not cp1252. Replacing it keeps every
+    label readable everywhere and keeps the names usable as JSON keys.
+    """
+    cleaned = "".join(character if character.isascii() else " " for character in label)
+    return " ".join(cleaned.split())
+
+
 def normalise_columns(frame: pd.DataFrame) -> pd.DataFrame:
     """Strip padding from column names and drop the duplicated one.
 
@@ -97,7 +108,7 @@ def clean(frame: pd.DataFrame) -> pd.DataFrame:
 
     # A few capture files repeat their header row in the middle of the data.
     frame = frame[frame[LABEL_COLUMN] != LABEL_COLUMN].copy()
-    frame[LABEL_COLUMN] = frame[LABEL_COLUMN].astype(str).str.strip()
+    frame[LABEL_COLUMN] = frame[LABEL_COLUMN].astype(str).map(normalise_label)
 
     frame = frame.drop(columns=[c for c in CONSTANT_COLUMNS if c in frame.columns])
 
