@@ -1,0 +1,30 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Local caches kept on the project drive
+.cache/
+
+# Data and model artifacts are too large for git
+data/raw/
+data/processed/
+models/*.joblib
+models/*.pt
+models/*.json
+
+# Node
+node_modules/
+.next/
+out/
+frontend/.env.local
+
+# Secrets
+.env
+
+# OS
+Thumbs.db
+.DS_Store
