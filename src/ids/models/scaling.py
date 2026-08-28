@@ -21,6 +21,14 @@ from __future__ import annotations
 import numpy as np
 
 
+# A feature that never varies comes back with a standard deviation of about
+# 1e-16 rather than a clean zero, because summing a million identical floats
+# does not land exactly on the mean. Dividing by that turns rounding noise into
+# values of order one, so anything below this counts as no variation at all.
+# Real features vary by at least a tenth once compressed.
+NO_VARIATION = 1e-9
+
+
 class LogStandardScaler:
     """Signed log compression followed by standardisation.
 
@@ -41,8 +49,7 @@ class LogStandardScaler:
         compressed = self._compress(np.asarray(features, dtype=np.float64))
         self.mean_ = compressed.mean(axis=0)
         scale = compressed.std(axis=0)
-        # A constant feature would divide by zero. Leave it centred instead.
-        scale[scale == 0.0] = 1.0
+        scale[scale < NO_VARIATION] = 1.0
         self.scale_ = scale
         self.n_features_in_ = compressed.shape[1]
         return self
