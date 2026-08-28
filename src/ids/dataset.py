@@ -9,7 +9,7 @@ import pandas as pd
 
 from ids.config import PROCESSED_DIR
 
-META_COLUMNS = ("attack_type", "is_attack", "capture_file")
+META_COLUMNS = ("attack_type", "is_attack", "capture_session")
 
 
 def feature_names(processed_dir: Path = PROCESSED_DIR) -> list[str]:

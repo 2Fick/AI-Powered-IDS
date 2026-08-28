@@ -1,10 +1,15 @@
-"""Turn the raw CICIDS2017 CSV files into clean train, test and replay splits.
+"""Turn the raw CICIDS2017 capture files into clean train, test and replay splits.
 
 The raw files need a fair amount of cleaning before any model can use them:
 column names carry stray spaces, one column is duplicated, throughput columns
-contain infinities when a flow lasts zero microseconds, and a few rows are
+hold infinities when a flow lasts zero microseconds, and a few rows are
 repeated header lines. This module does that once and writes Parquet files so
 training runs stay fast.
+
+Flow identity (addresses, ports, protocol, timestamp) is carried through the
+whole pipeline but only Destination Port is handed to the models. The rest is
+there so an alert can say who talked to whom, and so a suspicious address can
+be checked against threat intelligence.
 """
 
 from __future__ import annotations
@@ -21,14 +26,15 @@ from ids.config import (
     BENIGN_LABEL,
     CICIDS2017_FILES,
     LABEL_COLUMN,
+    NON_FEATURE_COLUMNS,
     PROCESSED_DIR,
     RANDOM_SEED,
     RAW_DIR,
     ensure_dirs,
 )
 
-# Columns that hold no signal: they are constant across the whole dataset or
-# they leak the capture setup rather than describing the flow.
+# Columns that hold the same value on every single flow. They cost memory and
+# give the models nothing, so they go.
 CONSTANT_COLUMNS = [
     "Bwd PSH Flags",
     "Bwd URG Flags",
@@ -40,10 +46,18 @@ CONSTANT_COLUMNS = [
     "Bwd Avg Bulk Rate",
 ]
 
+META_COLUMNS = ("attack_type", "is_attack", "capture_session")
+
 
 def normalise_columns(frame: pd.DataFrame) -> pd.DataFrame:
-    """Strip padding from column names and drop the duplicated one."""
+    """Strip padding from column names and drop the duplicated one.
+
+    The flow generator emits Fwd Header Length twice. The second copy arrives
+    as Fwd Header Length.1 and holds identical values, so it is dropped.
+    """
     frame.columns = [str(column).strip() for column in frame.columns]
+    duplicated = [column for column in frame.columns if column.endswith(".1")]
+    frame = frame.drop(columns=duplicated)
     return frame.loc[:, ~frame.columns.duplicated()]
 
 
@@ -55,40 +69,57 @@ def load_raw(raw_dir: Path) -> pd.DataFrame:
             raise FileNotFoundError(
                 f"{path} is missing, run: python -m ids.data.download"
             )
-        frame = pd.read_csv(path, low_memory=False, encoding="latin-1")
-        frame = normalise_columns(frame)
-        frame["capture_file"] = name
+        frame = normalise_columns(pd.read_parquet(path))
+        session = name.split(".")[0]
+        frame["capture_session"] = session
         frames.append(frame)
-        print(f"  {name}: {len(frame):>9,} rows")
+        print(f"  {session}: {len(frame):>9,} rows")
     return pd.concat(frames, ignore_index=True)
+
+
+def parse_timestamps(values: pd.Series) -> pd.Series:
+    """Read the capture timestamps.
+
+    They are written as day/month/year with a 12 hour clock and no AM or PM
+    marker. Everything was captured between 08:00 and 17:00, so an hour below
+    8 belongs to the afternoon and gets its 12 hours added back.
+    """
+    parsed = pd.to_datetime(values, format="%d/%m/%Y %H:%M", errors="coerce")
+    if parsed.isna().all():
+        parsed = pd.to_datetime(values, errors="coerce", dayfirst=True)
+    afternoon = (parsed.dt.hour < 8).fillna(False)
+    return parsed + pd.to_timedelta(afternoon.astype(int) * 12, unit="h")
 
 
 def clean(frame: pd.DataFrame) -> pd.DataFrame:
     """Drop unusable rows and columns, and make every feature a finite float."""
     before = len(frame)
 
-    # Some files repeat their header in the middle of the data.
-    frame = frame[frame[LABEL_COLUMN] != LABEL_COLUMN]
+    # A few capture files repeat their header row in the middle of the data.
+    frame = frame[frame[LABEL_COLUMN] != LABEL_COLUMN].copy()
     frame[LABEL_COLUMN] = frame[LABEL_COLUMN].astype(str).str.strip()
 
     frame = frame.drop(columns=[c for c in CONSTANT_COLUMNS if c in frame.columns])
 
+    frame["Timestamp"] = parse_timestamps(frame["Timestamp"])
+    for column in ("Flow ID", "Source IP", "Destination IP"):
+        frame[column] = frame[column].astype(str).str.strip()
+
     feature_columns = [
         column
         for column in frame.columns
-        if column not in (LABEL_COLUMN, "capture_file")
+        if column not in NON_FEATURE_COLUMNS
+        and column not in (LABEL_COLUMN, "capture_session")
     ]
     frame[feature_columns] = frame[feature_columns].apply(
         pd.to_numeric, errors="coerce"
     )
 
     # Flow Bytes/s and Flow Packets/s go infinite on zero duration flows.
-    frame[feature_columns] = frame[feature_columns].replace(
-        [np.inf, -np.inf], np.nan
-    )
-    frame = frame.dropna(subset=feature_columns)
+    frame[feature_columns] = frame[feature_columns].replace([np.inf, -np.inf], np.nan)
+    frame = frame.dropna(subset=feature_columns + ["Timestamp"])
 
-    # Negative header lengths and durations are capture artefacts.
+    # Negative durations are capture artefacts.
     frame = frame[frame["Flow Duration"] >= 0]
 
     frame[feature_columns] = frame[feature_columns].astype(np.float32)
@@ -105,13 +136,12 @@ def add_labels(frame: pd.DataFrame) -> pd.DataFrame:
 def split(frame: pd.DataFrame, replay_size: int, test_size: float):
     """Carve out a replay slice first, then split the rest into train and test.
 
-    The replay slice is what the live dashboard streams. It is taken from the
-    data before the train and test split so that nothing the models were fitted
-    on shows up in the demo.
+    The replay slice is what the dashboard streams. Taking it out before the
+    train and test split keeps the live demo free of any flow a model was
+    fitted on. It is sorted by capture time so the replay follows the order the
+    traffic actually happened in.
     """
-    replay = frame.sample(
-        n=min(replay_size, len(frame)), random_state=RANDOM_SEED
-    ).sort_index()
+    replay = frame.sample(n=min(replay_size, len(frame)), random_state=RANDOM_SEED)
     remaining = frame.drop(index=replay.index)
 
     train, test = train_test_split(
@@ -123,7 +153,7 @@ def split(frame: pd.DataFrame, replay_size: int, test_size: float):
     return (
         train.reset_index(drop=True),
         test.reset_index(drop=True),
-        replay.reset_index(drop=True),
+        replay.sort_values("Timestamp").reset_index(drop=True),
     )
 
 
@@ -143,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
     ensure_dirs()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
-    print("Reading raw CSV files")
+    print("Reading raw capture files")
     frame = load_raw(args.raw_dir)
     print(f"Combined: {len(frame):,} rows, {len(frame.columns)} columns")
 
@@ -169,7 +199,7 @@ def main(argv: list[str] | None = None) -> int:
     feature_columns = [
         column
         for column in train.columns
-        if column not in ("attack_type", "is_attack", "capture_file")
+        if column not in META_COLUMNS and column not in NON_FEATURE_COLUMNS
     ]
     (args.out_dir / "features.txt").write_text(
         "\n".join(feature_columns) + "\n", encoding="utf-8"

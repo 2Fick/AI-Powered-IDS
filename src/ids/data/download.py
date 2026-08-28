@@ -1,8 +1,8 @@
-"""Download the CICIDS2017 CSV files into the project data directory.
+"""Download the CICIDS2017 capture files into the project data directory.
 
 The dataset home page at the University of New Brunswick is behind a
-registration form, so the files are pulled from a public mirror that hosts the
-exact same eight CSV files. Downloads resume if they are interrupted.
+registration form, so the files are pulled from a public mirror. Downloads
+resume if they are interrupted.
 """
 
 from __future__ import annotations
@@ -76,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
         "--out",
         type=Path,
         default=RAW_DIR,
-        help="directory the CSV files are written to (default: data/raw)",
+        help="directory the capture files are written to (default: data/raw)",
     )
     args = parser.parse_args(argv)
 
@@ -91,7 +91,7 @@ def main(argv: list[str] | None = None) -> int:
         for name in CICIDS2017_FILES:
             download_file(client, name, args.out)
 
-    total = sum(path.stat().st_size for path in args.out.glob("*.csv"))
+    total = sum(path.stat().st_size for path in args.out.glob("*.parquet"))
     print(f"Done. {total / 1e9:.2f} GB in {args.out}")
     return 0
 
