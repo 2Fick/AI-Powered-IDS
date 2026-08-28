@@ -1,0 +1,29 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      VIRUSTOTAL_API_KEY: "${VIRUSTOTAL_API_KEY:-}"
+      ABUSEIPDB_API_KEY: "${ABUSEIPDB_API_KEY:-}"
+    volumes:
+      # Training output, produced on the host by the commands in the README.
+      # Read only, because the API never writes to any of it.
+      - ./models:/app/models:ro
+      - ./data/processed:/app/data/processed:ro
+      - ./reports:/app/reports:ro
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:8000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
