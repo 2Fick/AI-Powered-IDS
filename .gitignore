@@ -28,3 +28,4 @@ frontend/.env.local
 # OS
 Thumbs.db
 .DS_Store
+.claude/

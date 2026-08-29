@@ -1,0 +1,307 @@
+{
+  "generated_at": "2026-09-06T10:33:42+00:00",
+  "test_rows": 691941,
+  "test_attacks": 136187,
+  "target_fpr": 0.01,
+  "machine": {
+    "platform": "Windows-10-10.0.19045-SP0",
+    "processor": "Intel64 Family 6 Model 94 Stepping 3, GenuineIntel",
+    "python": "3.12.10"
+  },
+  "models": {
+    "random_forest": {
+      "label": "Random Forest",
+      "kind": "supervised",
+      "threshold": 0.5,
+      "recall": 0.9987003164766094,
+      "false_positive_rate": 0.0007341377659899884,
+      "precision": 0.9970091923353224,
+      "f1": 0.9978540378936557,
+      "accuracy": 0.999154552194479,
+      "roc_auc": 0.9999194905773757,
+      "pr_auc": 0.9996611728467127,
+      "confusion": {
+        "true_negative": 555346,
+        "false_positive": 408,
+        "false_negative": 177,
+        "true_positive": 136010
+      },
+      "batch_latency_ms_per_flow": 0.010993854822861242,
+      "batch_seconds": 7.607098899985431,
+      "single_flow_latency": {
+        "p50_ms": 3.0915999959688634,
+        "p95_ms": 3.856185017502867,
+        "mean_ms": 3.208792665391229,
+        "samples": 300
+      },
+      "per_attack_recall": {
+        "Bot": {
+          "support": 479,
+          "detected": 380,
+          "recall": 0.7933194154488518
+        },
+        "DDoS": {
+          "support": 31319,
+          "detected": 31312,
+          "recall": 0.9997764935023468
+        },
+        "DoS GoldenEye": {
+          "support": 2519,
+          "detected": 2516,
+          "recall": 0.9988090512107979
+        },
+        "DoS Hulk": {
+          "support": 56320,
+          "detected": 56276,
+          "recall": 0.99921875
+        },
+        "DoS Slowhttptest": {
+          "support": 1345,
+          "detected": 1342,
+          "recall": 0.9977695167286246
+        },
+        "DoS slowloris": {
+          "support": 1418,
+          "detected": 1416,
+          "recall": 0.998589562764457
+        },
+        "FTP-Patator": {
+          "support": 1940,
+          "detected": 1940,
+          "recall": 1.0
+        },
+        "Heartbleed": {
+          "support": 3,
+          "detected": 3,
+          "recall": 1.0
+        },
+        "Infiltration": {
+          "support": 9,
+          "detected": 6,
+          "recall": 0.6666666666666666
+        },
+        "PortScan": {
+          "support": 38855,
+          "detected": 38851,
+          "recall": 0.9998970531463132
+        },
+        "SSH-Patator": {
+          "support": 1444,
+          "detected": 1441,
+          "recall": 0.9979224376731302
+        },
+        "Web Attack Brute Force": {
+          "support": 371,
+          "detected": 366,
+          "recall": 0.9865229110512129
+        },
+        "Web Attack Sql Injection": {
+          "support": 5,
+          "detected": 4,
+          "recall": 0.8
+        },
+        "Web Attack XSS": {
+          "support": 160,
+          "detected": 157,
+          "recall": 0.98125
+        }
+      }
+    },
+    "isolation_forest": {
+      "label": "Isolation Forest",
+      "kind": "unsupervised",
+      "threshold": 0.5958657497963002,
+      "recall": 0.11318995205122369,
+      "false_positive_rate": 0.010049410350622758,
+      "precision": 0.7340476190476191,
+      "f1": 0.1961358127580525,
+      "accuracy": 0.8173876096372379,
+      "roc_auc": 0.9012548711784618,
+      "pr_auc": 0.6448135505571193,
+      "confusion": {
+        "true_negative": 550169,
+        "false_positive": 5585,
+        "false_negative": 120772,
+        "true_positive": 15415
+      },
+      "batch_latency_ms_per_flow": 0.020979132324836624,
+      "batch_seconds": 14.516321799979778,
+      "single_flow_latency": {
+        "p50_ms": 3.430650001973845,
+        "p95_ms": 6.681660021422432,
+        "mean_ms": 4.09772699844325,
+        "samples": 300
+      },
+      "per_attack_recall": {
+        "Bot": {
+          "support": 479,
+          "detected": 10,
+          "recall": 0.020876826722338204
+        },
+        "DDoS": {
+          "support": 31319,
+          "detected": 4837,
+          "recall": 0.15444298987834862
+        },
+        "DoS GoldenEye": {
+          "support": 2519,
+          "detected": 92,
+          "recall": 0.03652242953552997
+        },
+        "DoS Hulk": {
+          "support": 56320,
+          "detected": 8667,
+          "recall": 0.15388849431818183
+        },
+        "DoS Slowhttptest": {
+          "support": 1345,
+          "detected": 1005,
+          "recall": 0.7472118959107806
+        },
+        "DoS slowloris": {
+          "support": 1418,
+          "detected": 724,
+          "recall": 0.5105782792665726
+        },
+        "FTP-Patator": {
+          "support": 1940,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "Heartbleed": {
+          "support": 3,
+          "detected": 3,
+          "recall": 1.0
+        },
+        "Infiltration": {
+          "support": 9,
+          "detected": 6,
+          "recall": 0.6666666666666666
+        },
+        "PortScan": {
+          "support": 38855,
+          "detected": 71,
+          "recall": 0.0018273066529404195
+        },
+        "SSH-Patator": {
+          "support": 1444,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "Web Attack Brute Force": {
+          "support": 371,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "Web Attack Sql Injection": {
+          "support": 5,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "Web Attack XSS": {
+          "support": 160,
+          "detected": 0,
+          "recall": 0.0
+        }
+      }
+    },
+    "autoencoder": {
+      "label": "Autoencoder",
+      "kind": "deep learning",
+      "threshold": 0.17413026094436646,
+      "recall": 0.37685682186992886,
+      "false_positive_rate": 0.01009439428236234,
+      "precision": 0.9014631233203941,
+      "f1": 0.5315140845070422,
+      "accuracy": 0.8692460773389639,
+      "roc_auc": 0.9295935649906673,
+      "pr_auc": 0.7968541990721169,
+      "confusion": {
+        "true_negative": 550144,
+        "false_positive": 5610,
+        "false_negative": 84864,
+        "true_positive": 51323
+      },
+      "batch_latency_ms_per_flow": 0.000454666655108406,
+      "batch_seconds": 0.31460250000236556,
+      "single_flow_latency": {
+        "p50_ms": 0.3383999865036458,
+        "p95_ms": 0.393664998409804,
+        "mean_ms": 0.3549370010538648,
+        "samples": 300
+      },
+      "per_attack_recall": {
+        "Bot": {
+          "support": 479,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DDoS": {
+          "support": 31319,
+          "detected": 13246,
+          "recall": 0.4229381525591494
+        },
+        "DoS GoldenEye": {
+          "support": 2519,
+          "detected": 678,
+          "recall": 0.2691544263596665
+        },
+        "DoS Hulk": {
+          "support": 56320,
+          "detected": 34620,
+          "recall": 0.6147017045454546
+        },
+        "DoS Slowhttptest": {
+          "support": 1345,
+          "detected": 1216,
+          "recall": 0.9040892193308551
+        },
+        "DoS slowloris": {
+          "support": 1418,
+          "detected": 1238,
+          "recall": 0.8730606488011283
+        },
+        "FTP-Patator": {
+          "support": 1940,
+          "detected": 7,
+          "recall": 0.0036082474226804126
+        },
+        "Heartbleed": {
+          "support": 3,
+          "detected": 3,
+          "recall": 1.0
+        },
+        "Infiltration": {
+          "support": 9,
+          "detected": 8,
+          "recall": 0.8888888888888888
+        },
+        "PortScan": {
+          "support": 38855,
+          "detected": 306,
+          "recall": 0.00787543430703899
+        },
+        "SSH-Patator": {
+          "support": 1444,
+          "detected": 1,
+          "recall": 0.0006925207756232687
+        },
+        "Web Attack Brute Force": {
+          "support": 371,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "Web Attack Sql Injection": {
+          "support": 5,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "Web Attack XSS": {
+          "support": 160,
+          "detected": 0,
+          "recall": 0.0
+        }
+      }
+    }
+  }
+}
