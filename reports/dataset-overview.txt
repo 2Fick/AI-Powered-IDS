@@ -1,0 +1,146 @@
+CICIDS2017 dataset overview
+===========================
+
+Capture sessions
+----------------
+Monday-WorkingHours
+    529,918 flows,        0 attacks ( 0.00%)
+  2017-07-03 11:55:58 to 2017-07-03 20:01:34
+  attacks: none
+Tuesday-WorkingHours
+    445,909 flows,   13,835 attacks ( 3.10%)
+  2017-07-04 11:53:00 to 2017-07-04 20:00:00
+  attacks: FTP-Patator, SSH-Patator
+Wednesday-workingHours
+    692,703 flows,  252,672 attacks (36.48%)
+  2017-07-05 11:42:00 to 2017-07-05 20:10:00
+  attacks: DoS GoldenEye, DoS Hulk, DoS Slowhttptest, DoS slowloris, Heartbleed
+Thursday-WorkingHours-Morning-WebAttacks
+    170,366 flows,    2,180 attacks ( 1.28%)
+  2017-07-06 11:59:00 to 2017-07-06 15:59:00
+  attacks: Web Attack Brute Force, Web Attack Sql Injection, Web Attack XSS
+  plus 288,602 rows where every column is empty, which are padding rather than traffic
+Thursday-WorkingHours-Afternoon-Infilteration
+    288,602 flows,       36 attacks ( 0.01%)
+  2017-07-06 16:00:00 to 2017-07-06 20:04:00
+  attacks: Infiltration
+Friday-WorkingHours-Morning
+    191,033 flows,    1,966 attacks ( 1.03%)
+  2017-07-07 11:59:00 to 2017-07-07 15:59:00
+  attacks: Bot
+Friday-WorkingHours-Afternoon-PortScan
+    286,467 flows,  158,930 attacks (55.48%)
+  2017-07-07 16:00:00 to 2017-07-07 18:29:00
+  attacks: PortScan
+Friday-WorkingHours-Afternoon-DDos
+    225,745 flows,  128,027 attacks (56.71%)
+  2017-07-07 18:30:00 to 2017-07-07 20:02:00
+  attacks: DDoS
+
+288,602 empty rows in total. They carry no label, so a naive reading counts them
+as attacks. Preprocessing drops them along with every other row that has a missing feature.
+
+Combined: 3,119,345 flows, 85 columns
+
+Attack families
+---------------
+Counted over 2,830,743 rows that carry a label.
+
+family                            flows     share
+BENIGN                        2,273,097  80.3004%
+DoS Hulk                        231,073   8.1630%
+PortScan                        158,930   5.6144%
+DDoS                            128,027   4.5227%
+DoS GoldenEye                    10,293   0.3636%
+FTP-Patator                       7,938   0.2804%
+SSH-Patator                       5,897   0.2083%
+DoS slowloris                     5,796   0.2048%
+DoS Slowhttptest                  5,499   0.1943%
+Bot                               1,966   0.0695%
+Web Attack Brute Force            1,507   0.0532%
+Web Attack XSS                      652   0.0230%
+Infiltration                         36   0.0013%
+Web Attack Sql Injection             21   0.0007%
+Heartbleed                           11   0.0004%
+
+The rarest family has 11 flows and the largest has 2,273,097. That gap is the reason accuracy means nothing here
+and why the benchmark reports recall per family.
+
+Columns
+-------
+85 columns in the raw files.
+  6 identity columns kept out of the models:
+    Flow ID, Source IP, Source Port, Destination IP, Protocol, Timestamp
+  77 numeric columns before pruning.
+
+Columns with a single value across the whole dataset (8):
+    Bwd PSH Flags
+    Bwd URG Flags
+    Fwd Avg Bytes/Bulk
+    Fwd Avg Packets/Bulk
+    Fwd Avg Bulk Rate
+    Bwd Avg Bytes/Bulk
+    Bwd Avg Packets/Bulk
+    Bwd Avg Bulk Rate
+These are dropped in preprocessing, they carry no signal.
+
+Values that need cleaning
+-------------------------
+288,602 rows are empty across every feature and are set aside here.
+The counts below are over the remaining 2,830,743 rows.
+
+Infinite values, which appear when a flow lasts zero microseconds:
+    Flow Bytes/s                  1,509
+    Flow Packets/s                2,867
+
+Missing or unparseable values:
+    Flow Bytes/s                  1,358
+
+Flows with a negative duration: 115
+Header rows repeated inside the data: 0
+
+How skewed the features are
+---------------------------
+feature                             median             p99               max     max/p99
+Total Length of Bwd Packets         123.00       71,831.00    655,453,030.00       9,125
+Subflow Bwd Bytes                   123.00       71,831.00    655,453,030.00       9,125
+act_data_pkt_fwd                      1.00           27.00        213,557.00       7,910
+Subflow Bwd Packets                   2.00           57.00        291,922.00       5,121
+Total Backward Packets                2.00           57.00        291,922.00       5,121
+Total Fwd Packets                     2.00           48.00        219,759.00       4,578
+Subflow Fwd Packets                   2.00           48.00        219,759.00       4,578
+Bwd Header Length                    40.00        1,520.00      5,838,440.00       3,841
+Fwd Header Length                    64.00        1,328.00      4,644,908.00       3,498
+Total Length of Fwd Packets          62.00       11,595.00     12,900,000.00       1,113
+Subflow Fwd Bytes                    62.00       11,595.00     12,870,338.00       1,110
+Flow IAT Min                          4.00      541,413.16    120,000,000.00         222
+
+A maximum thousands of times above the 99th percentile is why plain
+standardisation fails here: a handful of flows would set the scale for
+every feature. The pipeline compresses with a signed logarithm first.
+
+Who talks to whom
+-----------------
+Busiest attack sources:
+    172.16.0.1          555,641  DDoS, DoS GoldenEye, DoS Hulk, DoS Slowhttptest
+    205.174.165.73          705  Bot
+    192.168.10.15           371  Bot
+    192.168.10.8            307  Bot, Infiltration
+    192.168.10.9            226  Bot
+    192.168.10.14           209  Bot
+    192.168.10.5            180  Bot
+    192.168.10.50             3  DDoS
+
+Busiest attack targets:
+    192.168.10.50       555,630
+    205.174.165.73        1,293
+    192.168.10.15           209
+    192.168.10.9            146
+    192.168.10.14           139
+    192.168.10.5            108
+    192.168.10.8            103
+    192.168.10.51            11
+
+The capture runs on a private test bed, so nearly every address is in
+private space. Only the few public ones are worth sending to a threat
+intelligence service, which is what keeps the free tiers usable.
