@@ -1,8 +1,18 @@
 """Look up suspicious addresses against free threat intelligence services.
 
-Two sources are queried, VirusTotal and AbuseIPDB. Both are optional: with no
-API key configured the lookup returns a result that says so instead of failing,
-which keeps the rest of the system working out of the box.
+Four sources are queried, and they answer different questions:
+
+  VirusTotal   how many security vendors call this address malicious
+  AbuseIPDB    how many people have reported it, and for what
+  Shodan       what it exposes to the internet, and which CVEs those services
+               are known to be vulnerable to
+  GreyNoise    whether it is one of the machines that scan the whole internet
+               all day, which is the difference between being targeted and
+               being background noise
+
+The first two need a free API key. The last two answer without one, so the
+enrichment is never completely dark even on a fresh clone. Any source with no
+key reports that instead of failing.
 
 Three things keep the free tiers usable. Private and reserved addresses are
 never sent anywhere, which alone skips most of the CICIDS2017 traffic since the
@@ -23,11 +33,16 @@ import httpx
 
 VIRUSTOTAL_URL = "https://www.virustotal.com/api/v3/ip_addresses/{ip}"
 ABUSEIPDB_URL = "https://api.abuseipdb.com/api/v2/check"
+SHODAN_URL = "https://internetdb.shodan.io/{ip}"
+GREYNOISE_URL = "https://api.greynoise.io/v3/community/{ip}"
 
 # The VirusTotal public plan allows four requests a minute. AbuseIPDB is far
 # more generous per minute but caps the day, so it gets a gentle limit too.
+# The two keyless services are polite defaults rather than published limits.
 VIRUSTOTAL_PER_MINUTE = 4
 ABUSEIPDB_PER_MINUTE = 20
+SHODAN_PER_MINUTE = 30
+GREYNOISE_PER_MINUTE = 30
 
 
 class RateLimiter:
@@ -70,6 +85,13 @@ class IntelReport:
 
     @property
     def malicious(self) -> bool:
+        """True when a source that names names says this address is bad.
+
+        Shodan and GreyNoise are deliberately left out of this decision. An
+        exposed service is not an attack and an internet wide scanner is not
+        aimed at anyone in particular, so both are context rather than a
+        verdict.
+        """
         virustotal = self.sources.get("virustotal", {})
         abuseipdb = self.sources.get("abuseipdb", {})
         return bool(virustotal.get("malicious", 0)) or (
@@ -117,10 +139,23 @@ class ThreatIntelClient:
         self._client = httpx.AsyncClient(timeout=timeout_seconds)
         self._virustotal_limit = RateLimiter(VIRUSTOTAL_PER_MINUTE)
         self._abuseipdb_limit = RateLimiter(ABUSEIPDB_PER_MINUTE)
+        self._shodan_limit = RateLimiter(SHODAN_PER_MINUTE)
+        self._greynoise_limit = RateLimiter(GREYNOISE_PER_MINUTE)
 
     @property
     def enabled(self) -> bool:
-        return bool(self.virustotal_api_key or self.abuseipdb_api_key)
+        """Two of the four sources need no key, so enrichment is always on."""
+        return True
+
+    @property
+    def keyed_sources(self) -> list[str]:
+        """Which of the key based sources are actually configured."""
+        configured = []
+        if self.virustotal_api_key:
+            configured.append("virustotal")
+        if self.abuseipdb_api_key:
+            configured.append("abuseipdb")
+        return configured
 
     async def aclose(self) -> None:
         await self._client.aclose()
@@ -182,6 +217,60 @@ class ThreatIntelClient:
             "usage_type": data.get("usageType"),
         }
 
+    async def _query_shodan(self, ip: str) -> dict[str, Any]:
+        """Ask what this address exposes. No key, no account, no quota page."""
+        if not await self._shodan_limit.acquire():
+            return {"status": "rate limited locally"}
+        try:
+            response = await self._client.get(SHODAN_URL.format(ip=ip))
+        except httpx.HTTPError as error:
+            return {"status": f"request failed: {error.__class__.__name__}"}
+        if response.status_code == 404:
+            return {"status": "ok", "known": False}
+        if response.status_code != 200:
+            return {"status": f"http {response.status_code}"}
+
+        data = response.json()
+        vulnerabilities = data.get("vulns", [])
+        return {
+            "status": "ok",
+            "known": True,
+            "open_ports": data.get("ports", [])[:20],
+            "port_count": len(data.get("ports", [])),
+            "tags": data.get("tags", []),
+            "vulnerability_count": len(vulnerabilities),
+            "vulnerabilities": vulnerabilities[:10],
+            "hostnames": data.get("hostnames", [])[:3],
+        }
+
+    async def _query_greynoise(self, ip: str) -> dict[str, Any]:
+        """Ask whether this address scans the whole internet all day.
+
+        A hit here downgrades an alert rather than raising it: mass scanners
+        hit every address on the internet, so seeing one says nothing about
+        being singled out.
+        """
+        if not await self._greynoise_limit.acquire():
+            return {"status": "rate limited locally"}
+        try:
+            response = await self._client.get(GREYNOISE_URL.format(ip=ip))
+        except httpx.HTTPError as error:
+            return {"status": f"request failed: {error.__class__.__name__}"}
+        if response.status_code == 429:
+            return {"status": "quota exhausted"}
+        if response.status_code not in (200, 404):
+            return {"status": f"http {response.status_code}"}
+
+        data = response.json()
+        return {
+            "status": "ok",
+            "internet_scanner": bool(data.get("noise", False)),
+            "common_business_service": bool(data.get("riot", False)),
+            "classification": data.get("classification"),
+            "name": data.get("name"),
+            "last_seen": data.get("last_seen"),
+        }
+
     async def lookup(self, ip: str) -> IntelReport:
         if not is_routable(ip):
             return IntelReport(
@@ -194,14 +283,22 @@ class ThreatIntelClient:
         if entry and entry.expires_at > time.monotonic():
             return IntelReport(ip=ip, routable=True, sources=entry.value, cached=True)
 
-        virustotal, abuseipdb = await asyncio.gather(
-            self._query_virustotal(ip), self._query_abuseipdb(ip)
+        virustotal, abuseipdb, shodan, greynoise = await asyncio.gather(
+            self._query_virustotal(ip),
+            self._query_abuseipdb(ip),
+            self._query_shodan(ip),
+            self._query_greynoise(ip),
         )
-        sources = {"virustotal": virustotal, "abuseipdb": abuseipdb}
+        sources = {
+            "virustotal": virustotal,
+            "abuseipdb": abuseipdb,
+            "shodan": shodan,
+            "greynoise": greynoise,
+        }
 
         # Only cache answers that actually came back, so a rate limited call is
         # retried later instead of being remembered as a miss.
-        if virustotal.get("status") == "ok" or abuseipdb.get("status") == "ok":
+        if any(source.get("status") == "ok" for source in sources.values()):
             self._cache[ip] = CacheEntry(
                 value=sources, expires_at=time.monotonic() + self.cache_ttl_seconds
             )

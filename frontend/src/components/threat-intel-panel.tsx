@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { GlobeIcon } from "lucide-react";
+import { GlobeIcon, RadarIcon, ServerIcon, ShieldIcon } from "lucide-react";
 import {
 	Card,
 	CardContent,
@@ -16,7 +16,6 @@ import type { StreamSnapshot } from "@/hooks/use-ids-stream";
 type VirusTotalSource = {
 	status?: string;
 	malicious?: number;
-	country?: string;
 	owner?: string;
 };
 
@@ -24,39 +23,81 @@ type AbuseSource = {
 	status?: string;
 	abuse_confidence_score?: number;
 	total_reports?: number;
-	isp?: string;
 };
 
-function summarise(report: IntelEvent): string {
+type ShodanSource = {
+	status?: string;
+	known?: boolean;
+	port_count?: number;
+	tags?: string[];
+	vulnerability_count?: number;
+};
+
+type GreyNoiseSource = {
+	status?: string;
+	internet_scanner?: boolean;
+	common_business_service?: boolean;
+	classification?: string | null;
+};
+
+type Line = { icon: typeof GlobeIcon; text: string };
+
+function lines(report: IntelEvent): Line[] {
 	const virustotal = report.sources.virustotal as VirusTotalSource | undefined;
 	const abuse = report.sources.abuseipdb as AbuseSource | undefined;
-	const parts: string[] = [];
+	const shodan = report.sources.shodan as ShodanSource | undefined;
+	const greynoise = report.sources.greynoise as GreyNoiseSource | undefined;
+	const result: Line[] = [];
 
 	if (virustotal?.status === "ok") {
-		parts.push(`${virustotal.malicious ?? 0} vendors flag it`);
-		if (virustotal.owner) {
-			parts.push(virustotal.owner);
-		}
+		result.push({
+			icon: ShieldIcon,
+			text: `${virustotal.malicious ?? 0} vendors flag it${
+				virustotal.owner ? `, ${virustotal.owner}` : ""
+			}`,
+		});
 	}
 	if (abuse?.status === "ok") {
-		parts.push(`abuse score ${abuse.abuse_confidence_score ?? 0}`);
-		if (abuse.total_reports) {
-			parts.push(`${abuse.total_reports} reports`);
-		}
+		result.push({
+			icon: ShieldIcon,
+			text: `abuse score ${abuse.abuse_confidence_score ?? 0} from ${
+				abuse.total_reports ?? 0
+			} reports`,
+		});
 	}
-	if (parts.length === 0) {
-		const status = virustotal?.status ?? abuse?.status ?? "no answer";
-		return status;
+	if (shodan?.status === "ok" && shodan.known) {
+		const tags = shodan.tags?.length ? `, ${shodan.tags.join(", ")}` : "";
+		result.push({
+			icon: ServerIcon,
+			text: `${shodan.port_count ?? 0} ports open, ${
+				shodan.vulnerability_count ?? 0
+			} known CVEs${tags}`,
+		});
 	}
-	return parts.join(", ");
+	if (greynoise?.status === "ok") {
+		result.push({
+			icon: RadarIcon,
+			text: greynoise.internet_scanner
+				? `scans the internet at large${
+						greynoise.classification ? `, ${greynoise.classification}` : ""
+					}`
+				: greynoise.common_business_service
+					? "a common business service, not an attacker"
+					: "not a known internet wide scanner",
+		});
+	}
+	if (result.length === 0) {
+		result.push({ icon: GlobeIcon, text: "no source answered" });
+	}
+	return result;
 }
 
 /**
  * External context for the addresses that raised alerts.
  *
- * Only routable addresses are sent to the two services. Most of the CICIDS2017
- * traffic runs on a private test bed, so in practice this is the small set of
- * public addresses the capture touches.
+ * Only routable addresses are sent to the four services. Most of the
+ * CICIDS2017 traffic runs on a private test bed, so in practice this is the
+ * small set of public addresses the capture touches.
  */
 export function ThreatIntelPanel({
 	stream,
@@ -66,38 +107,39 @@ export function ThreatIntelPanel({
 	className?: string;
 }) {
 	const reports = Object.values(stream.intel).filter((item) => item.routable);
-	const enabled = stream.ready?.intel_enabled ?? false;
 
 	return (
 		<Card className={cn("shadow-none dark:ring-0", className)}>
 			<CardHeader>
 				<CardTitle>Threat intelligence</CardTitle>
 				<CardDescription>
-					{enabled
-						? "Public addresses behind alerts, checked against VirusTotal and AbuseIPDB."
-						: "Set VIRUSTOTAL_API_KEY or ABUSEIPDB_API_KEY to enable lookups. Both services have a free tier."}
+					Public addresses behind alerts, checked against Shodan and GreyNoise,
+					which need no key, plus VirusTotal and AbuseIPDB when a key is set.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="flex flex-col gap-3">
+			<CardContent className="flex max-h-72 flex-col gap-3 overflow-y-auto">
 				{reports.length === 0 ? (
 					<p className="text-muted-foreground text-sm">
 						No public address has raised an alert yet.
 					</p>
 				) : null}
 				{reports.map((report) => (
-					<div className="flex items-start gap-3" key={report.ip}>
-						<GlobeIcon className="mt-0.5 size-4 text-muted-foreground" />
-						<div className="flex flex-col gap-1">
-							<div className="flex items-center gap-2">
-								<span className="font-mono text-sm">{report.ip}</span>
-								<Badge variant={report.malicious ? "destructive" : "outline"}>
-									{report.malicious ? "flagged" : "clean"}
-								</Badge>
-							</div>
-							<span className="text-muted-foreground text-xs">
-								{summarise(report)}
-							</span>
+					<div className="flex flex-col gap-1" key={report.ip}>
+						<div className="flex items-center gap-2">
+							<span className="font-mono text-sm">{report.ip}</span>
+							<Badge variant={report.malicious ? "destructive" : "outline"}>
+								{report.malicious ? "flagged" : "clean"}
+							</Badge>
 						</div>
+						{lines(report).map((line) => (
+							<span
+								className="flex items-start gap-2 text-muted-foreground text-xs"
+								key={line.text}
+							>
+								<line.icon className="mt-0.5 size-3 shrink-0" />
+								{line.text}
+							</span>
+						))}
 					</div>
 				))}
 			</CardContent>

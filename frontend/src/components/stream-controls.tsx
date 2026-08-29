@@ -66,11 +66,6 @@ export function StreamControls({
 					{stream.ready
 						? `, ${formatInteger(stream.ready.total_flows)} held out flows in the capture`
 						: ""}
-					{stream.ready
-						? stream.ready.intel_enabled
-							? ", threat intelligence on"
-							: ", threat intelligence off (no API key)"
-						: ""}
 					.
 				</CardDescription>
 			</CardHeader>

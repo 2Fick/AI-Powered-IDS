@@ -23,12 +23,18 @@ def test_private_address_is_never_sent_out():
     assert "virustotal" not in report.sources
 
 
-def test_lookup_without_keys_reports_it_instead_of_failing():
-    client = ThreatIntelClient()
-    report = asyncio.run(client.lookup("205.174.165.73"))
-    assert report.routable
-    assert report.sources["virustotal"]["status"] == "no api key"
-    assert report.sources["abuseipdb"]["status"] == "no api key"
+def test_keyed_sources_reports_what_is_configured():
+    assert ThreatIntelClient().keyed_sources == []
+    assert ThreatIntelClient(abuseipdb_api_key="fake").keyed_sources == ["abuseipdb"]
+    assert ThreatIntelClient(
+        virustotal_api_key="fake", abuseipdb_api_key="fake"
+    ).keyed_sources == ["virustotal", "abuseipdb"]
+
+
+def test_keyless_sources_keep_enrichment_available():
+    # Shodan and GreyNoise answer without an account, so a fresh clone still
+    # gets something back.
+    assert ThreatIntelClient().enabled
 
 
 def test_rate_limiter_runs_out_of_tokens():
