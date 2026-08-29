@@ -41,14 +41,16 @@ function percent(value: number | null | undefined): string {
 export function LiveScoreboard({
 	stream,
 	className,
+	id,
 }: {
 	stream: StreamSnapshot;
 	className?: string;
+	id?: string;
 }) {
 	const models = stream.stats?.models;
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)}>
+		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Running scoreboard</CardTitle>
 				<CardDescription>

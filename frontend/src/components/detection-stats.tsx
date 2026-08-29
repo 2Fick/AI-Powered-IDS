@@ -18,7 +18,15 @@ function formatRate(value: number | null | undefined, digits = 2): string {
 	return `${(value * 100).toFixed(digits)}%`;
 }
 
-export function DetectionStats({ stream }: { stream: StreamSnapshot }) {
+export function DetectionStats({
+	stream,
+	className,
+	id,
+}: {
+	stream: StreamSnapshot;
+	className?: string;
+	id?: string;
+}) {
 	const forest = stream.stats?.models.random_forest;
 	const throughput = stream.stats?.actual_flows_per_second ?? 0;
 	const alerts = forest?.alerts ?? 0;
@@ -49,8 +57,12 @@ export function DetectionStats({ stream }: { stream: StreamSnapshot }) {
 
 	return (
 		<>
-			{cards.map((card) => (
-				<Card className={cn("shadow-none dark:ring-0")} key={card.label}>
+			{cards.map((card, index) => (
+				<Card
+					className={cn("shadow-none dark:ring-0", className)}
+					id={index === 0 ? id : undefined}
+					key={card.label}
+				>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2 font-normal text-muted-foreground text-xs">
 							{card.label}

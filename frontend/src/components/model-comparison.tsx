@@ -38,7 +38,7 @@ function percent(value: number, digits = 2): string {
  * dashboard rather than in a notebook. Every number comes from the API, which
  * reads the report written by the benchmark run.
  */
-export function ModelComparison({ className }: { className?: string }) {
+export function ModelComparison({ className, id }: { className?: string; id?: string }) {
 	const [report, setReport] = useState<BenchmarkReport | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +49,7 @@ export function ModelComparison({ className }: { className?: string }) {
 	}, []);
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-4 dark:ring-0", className)}>
+		<Card className={cn("shadow-none lg:col-span-4 dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Model comparison</CardTitle>
 				<CardDescription>

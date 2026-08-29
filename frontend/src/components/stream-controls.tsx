@@ -33,9 +33,11 @@ const CONNECTION_TEXT = {
 export function StreamControls({
 	stream,
 	className,
+	id,
 }: {
 	stream: StreamSnapshot;
 	className?: string;
+	id?: string;
 }) {
 	const [paused, setPaused] = useState(false);
 	const [rate, setRate] = useState("12");
@@ -52,7 +54,7 @@ export function StreamControls({
 	}
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)}>
+		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					Replay control

@@ -61,7 +61,7 @@ function RecallBar({ recall }: { recall: number }) {
  * fewest labelled examples, and that is where the two unsupervised models
  * still have something to say.
  */
-export function AttackCoverage({ className }: { className?: string }) {
+export function AttackCoverage({ className, id }: { className?: string; id?: string }) {
 	const [report, setReport] = useState<BenchmarkReport | null>(null);
 
 	useEffect(() => {
@@ -90,7 +90,7 @@ export function AttackCoverage({ className }: { className?: string }) {
 	}, [report]);
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-4 dark:ring-0", className)}>
+		<Card className={cn("shadow-none lg:col-span-4 dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Coverage by attack family</CardTitle>
 				<CardDescription>

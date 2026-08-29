@@ -36,9 +36,11 @@ const MAX_SLICES = 5;
 export function AttackMixChart({
 	stream,
 	className,
+	id,
 }: {
 	stream: StreamSnapshot;
 	className?: string;
+	id?: string;
 }) {
 	const { slices, total } = useMemo(() => {
 		const entries = Object.entries(stream.attackMix).sort(
@@ -75,7 +77,7 @@ export function AttackMixChart({
 	);
 
 	return (
-		<Card className={cn("flex flex-col shadow-none dark:ring-0", className)}>
+		<Card className={cn("flex flex-col shadow-none dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Attack mix</CardTitle>
 				<CardDescription>

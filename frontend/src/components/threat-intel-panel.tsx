@@ -102,14 +102,16 @@ function lines(report: IntelEvent): Line[] {
 export function ThreatIntelPanel({
 	stream,
 	className,
+	id,
 }: {
 	stream: StreamSnapshot;
 	className?: string;
+	id?: string;
 }) {
 	const reports = Object.values(stream.intel).filter((item) => item.routable);
 
 	return (
-		<Card className={cn("shadow-none dark:ring-0", className)}>
+		<Card className={cn("shadow-none dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Threat intelligence</CardTitle>
 				<CardDescription>

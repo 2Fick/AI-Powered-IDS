@@ -1,3 +1,5 @@
+"use client";
+
 import { LogoIcon } from "@/components/logo";
 import {
 	Sidebar,
@@ -12,20 +14,32 @@ import { NavGroup } from "@/components/nav-group";
 import { footerNavLinks, navGroups } from "@/components/app-shared";
 import { DatasetCard } from "@/components/dataset-card";
 
-export function AppSidebar() {
+export function AppSidebar({
+	active,
+	onSelect,
+}: {
+	active: string;
+	onSelect: (section: string) => void;
+}) {
 	return (
 		<Sidebar collapsible="icon" variant="inset">
 			<SidebarHeader className="h-14 justify-center">
-				<SidebarMenuButton asChild>
-					<a href="#/overview">
-						<LogoIcon />
-						<span className="font-medium">Flow Sentry</span>
-					</a>
+				<SidebarMenuButton
+					onClick={() => onSelect("overview")}
+					tooltip="Flow Sentry"
+				>
+					<LogoIcon />
+					<span className="font-medium">Flow Sentry</span>
 				</SidebarMenuButton>
 			</SidebarHeader>
 			<SidebarContent>
 				{navGroups.map((group, index) => (
-					<NavGroup key={`sidebar-group-${index}`} {...group} />
+					<NavGroup
+						active={active}
+						key={`sidebar-group-${index}`}
+						onSelect={onSelect}
+						{...group}
+					/>
 				))}
 			</SidebarContent>
 			<SidebarFooter>
@@ -37,8 +51,9 @@ export function AppSidebar() {
 								asChild
 								className="text-muted-foreground"
 								size="sm"
+								tooltip={item.title}
 							>
-								<a href={item.path} rel="noreferrer" target="_blank">
+								<a href={item.href} rel="noreferrer" target="_blank">
 									{item.icon}
 									<span>{item.title}</span>
 								</a>
