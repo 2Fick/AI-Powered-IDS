@@ -144,13 +144,25 @@ def add_labels(frame: pd.DataFrame) -> pd.DataFrame:
     return frame.drop(columns=[LABEL_COLUMN])
 
 
-def split(frame: pd.DataFrame, replay_size: int, test_size: float):
+def split(
+    frame: pd.DataFrame,
+    replay_size: int,
+    test_size: float,
+    replay_order: str = "shuffled",
+):
     """Carve out a replay slice first, then split the rest into train and test.
 
     The replay slice is what the dashboard streams. Taking it out before the
     train and test split keeps the live demo free of any flow a model was
-    fitted on. It is sorted by capture time so the replay follows the order the
-    traffic actually happened in.
+    fitted on.
+
+    Its order is a real trade off. The capture runs Monday to Friday and Monday
+    is benign traffic only, so a strictly chronological replay spends its first
+    quarter with nothing to detect. Shuffling gives every second of the stream
+    the attack density of the capture as a whole, which is what makes the
+    dashboard readable, at the cost of the real burst structure. Chronological
+    order stays available for anyone who wants to watch the attacks arrive in
+    waves the way they did.
     """
     replay = frame.sample(n=min(replay_size, len(frame)), random_state=RANDOM_SEED)
     remaining = frame.drop(index=replay.index)
@@ -161,10 +173,16 @@ def split(frame: pd.DataFrame, replay_size: int, test_size: float):
         random_state=RANDOM_SEED,
         stratify=remaining["attack_type"],
     )
+
+    if replay_order == "chronological":
+        replay = replay.sort_values("Timestamp")
+    else:
+        replay = replay.sample(frac=1.0, random_state=RANDOM_SEED)
+
     return (
         train.reset_index(drop=True),
         test.reset_index(drop=True),
-        replay.sort_values("Timestamp").reset_index(drop=True),
+        replay.reset_index(drop=True),
     )
 
 
@@ -178,6 +196,12 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=60_000,
         help="rows reserved for the live replay stream",
+    )
+    parser.add_argument(
+        "--replay-order",
+        choices=("shuffled", "chronological"),
+        default="shuffled",
+        help="order the replay stream walks its flows in",
     )
     args = parser.parse_args(argv)
 
@@ -198,7 +222,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {label:<28} {count:>9,}  ({100 * count / len(frame):5.2f}%)")
 
     print("Splitting")
-    train, test, replay = split(frame, args.replay_size, args.test_size)
+    train, test, replay = split(
+        frame, args.replay_size, args.test_size, args.replay_order
+    )
     for name, part in (("train", train), ("test", test), ("replay", replay)):
         attacks = int(part["is_attack"].sum())
         print(
