@@ -67,11 +67,15 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* The preset ships a greyscale chart palette. On this dashboard colour
+     carries meaning, since three models are drawn on the same axes and their
+     lines have to stay apart, so the five slots get distinct hues that keep a
+     readable contrast against both backgrounds. */
+  --chart-1: oklch(0.55 0.16 255);
+  --chart-2: oklch(0.62 0.15 175);
+  --chart-3: oklch(0.68 0.16 60);
+  --chart-4: oklch(0.58 0.19 15);
+  --chart-5: oklch(0.55 0.17 305);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -102,11 +106,11 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --chart-1: oklch(0.68 0.15 255);
+  --chart-2: oklch(0.72 0.14 175);
+  --chart-3: oklch(0.78 0.15 60);
+  --chart-4: oklch(0.68 0.18 15);
+  --chart-5: oklch(0.68 0.16 305);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);

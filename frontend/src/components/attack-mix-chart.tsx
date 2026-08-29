@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
-import { Cell, Pie, PieChart } from "recharts";
+import { Pie, PieChart } from "recharts";
 import {
 	Card,
 	CardContent,
@@ -13,6 +13,8 @@ import {
 import {
 	type ChartConfig,
 	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -25,6 +27,7 @@ const SLICE_COLORS = [
 	"var(--chart-3)",
 	"var(--chart-4)",
 	"var(--chart-5)",
+	"var(--muted-foreground)",
 ];
 
 const MAX_SLICES = 5;
@@ -49,8 +52,8 @@ export function AttackMixChart({
 			head.push(["Other", tailCount]);
 		}
 		return {
-			slices: head.map(([name, count], index) => ({
-				name,
+			slices: head.map(([family, count], index) => ({
+				family,
 				count,
 				fill: SLICE_COLORS[index % SLICE_COLORS.length],
 			})),
@@ -58,16 +61,21 @@ export function AttackMixChart({
 		};
 	}, [stream.attackMix]);
 
+	// Attack family names carry spaces, which cannot become CSS variable names,
+	// so each slice brings its own fill and the config only supplies labels.
 	const chartConfig = useMemo(
 		() =>
-			Object.fromEntries(
-				slices.map((slice) => [slice.name, { label: slice.name }])
-			) satisfies ChartConfig,
+			({
+				count: { label: "Flows" },
+				...Object.fromEntries(
+					slices.map((slice) => [slice.family, { label: slice.family }])
+				),
+			}) satisfies ChartConfig,
 		[slices]
 	);
 
 	return (
-		<Card className={cn("shadow-none dark:ring-0", className)}>
+		<Card className={cn("flex flex-col shadow-none dark:ring-0", className)}>
 			<CardHeader>
 				<CardTitle>Attack mix</CardTitle>
 				<CardDescription>
@@ -76,27 +84,33 @@ export function AttackMixChart({
 						: "Attack families seen in the replay so far."}
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="my-auto">
 				{slices.length === 0 ? (
 					<p className="text-muted-foreground text-sm">
 						No attack traffic replayed yet.
 					</p>
 				) : (
-					<ChartContainer className="aspect-square w-full" config={chartConfig}>
-						<PieChart>
+					<ChartContainer
+						className="mx-auto aspect-square max-h-64 w-full"
+						config={chartConfig}
+					>
+						<PieChart accessibilityLayer>
 							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
 							<Pie
+								cornerRadius={6}
 								data={slices}
 								dataKey="count"
-								innerRadius="45%"
-								nameKey="name"
-								outerRadius="80%"
-								strokeWidth={2}
-							>
-								{slices.map((slice) => (
-									<Cell fill={slice.fill} key={slice.name} />
-								))}
-							</Pie>
+								// The slice values change every time an attack goes past, and
+								// restarting the entry animation on each update leaves the
+								// chart blank.
+								isAnimationActive={false}
+								innerRadius={34}
+								nameKey="family"
+								outerRadius="88%"
+								stroke="var(--card)"
+								strokeWidth={3}
+							/>
+							<ChartLegend content={<ChartLegendContent nameKey="family" />} />
 						</PieChart>
 					</ChartContainer>
 				)}
