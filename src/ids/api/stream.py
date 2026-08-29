@@ -1,10 +1,10 @@
 """Replay a capture over a WebSocket so the dashboard sees live detection.
 
 The replay split was held out before training, so nothing streamed here was
-ever seen by a model. Flows go out in the order they were captured, at a rate
-the client controls, and every flow is scored by all three models one at a
-time. Scoring a single flow is what a real sensor would do, and it is also the
-only honest way to report a per inference latency.
+ever seen by a model. Flows go out at a rate the client controls, in whichever
+order the preprocessing step laid them down, and every flow is scored by all
+three models one at a time. Scoring a single flow is what a real sensor would
+do, and it is also the only honest way to report a per inference latency.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 from ids.detectors import MODEL_KINDS, MODEL_LABELS, DetectorBundle
-from ids.intel.client import ThreatIntelClient
+from ids.intel.client import ThreatIntelClient, is_routable
 
 
 @dataclass
@@ -213,8 +213,17 @@ class ReplayEngine:
 
 
 def should_enrich(event: dict[str, Any]) -> bool:
-    """Only spend threat intelligence quota on flows that raised an alert."""
-    return bool(event.get("any_alert"))
+    """Which flows are worth a threat intelligence lookup.
+
+    Two conditions. The flow has to have raised an alert, since quota is
+    limited and clean traffic is not interesting. And the address has to be
+    routable, because the capture runs on a private test bed and asking an
+    external service about 192.168.10.9 wastes a request and tells the
+    dashboard nothing.
+    """
+    if not event.get("any_alert"):
+        return False
+    return is_routable(event["flow"]["source_ip"])
 
 
 async def run_stream(
@@ -251,16 +260,12 @@ async def run_stream(
         await send(event)
 
         source_ip = event["flow"]["source_ip"]
-        if (
-            engine.intel.enabled
-            and should_enrich(event)
-            and source_ip not in seen_addresses
-        ):
+        if should_enrich(event) and source_ip not in seen_addresses:
             seen_addresses.add(source_ip)
-            task = asyncio.create_task(engine.intel_event(source_ip))
-            task.add_done_callback(pending_intel.discard)
-            pending_intel.add(task)
+            pending_intel.add(asyncio.create_task(engine.intel_event(source_ip)))
 
+        # Lookups run in the background so a slow service never holds up the
+        # stream. Whatever has come back by now goes out with this flow.
         for task in [t for t in pending_intel if t.done()]:
             pending_intel.discard(task)
             try:
