@@ -1,46 +1,82 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LogoIcon } from "@/components/logo";
 import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
+	SidebarGroup,
+	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarMenuSub,
+	SidebarMenuSubButton,
+	SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { NavGroup } from "@/components/nav-group";
-import { footerNavLinks, navGroups } from "@/components/app-shared";
+import { footerNavLinks, pages } from "@/components/app-shared";
 import { DatasetCard } from "@/components/dataset-card";
+import { flashSection } from "@/hooks/use-section-flash";
 
-export function AppSidebar({
-	active,
-	onSelect,
-}: {
-	active: string;
-	onSelect: (section: string) => void;
-}) {
+export function AppSidebar() {
+	const pathname = usePathname();
+
 	return (
 		<Sidebar collapsible="icon" variant="inset">
 			<SidebarHeader className="h-14 justify-center">
-				<SidebarMenuButton
-					onClick={() => onSelect("overview")}
-					tooltip="Flow Sentry"
-				>
-					<LogoIcon />
-					<span className="font-medium">Flow Sentry</span>
+				<SidebarMenuButton asChild tooltip="Flow Sentry">
+					<Link href="/">
+						<LogoIcon />
+						<span className="font-medium">Flow Sentry</span>
+					</Link>
 				</SidebarMenuButton>
 			</SidebarHeader>
 			<SidebarContent>
-				{navGroups.map((group, index) => (
-					<NavGroup
-						active={active}
-						key={`sidebar-group-${index}`}
-						onSelect={onSelect}
-						{...group}
-					/>
-				))}
+				{pages.map((page) => {
+					const current = pathname === page.path;
+					return (
+						<SidebarGroup key={page.path}>
+							<SidebarGroupLabel>{page.title}</SidebarGroupLabel>
+							<SidebarMenu>
+								<SidebarMenuItem>
+									<SidebarMenuButton
+										asChild
+										isActive={current}
+										tooltip={page.title}
+									>
+										<Link href={page.path}>
+											{page.icon}
+											<span>{page.title}</span>
+										</Link>
+									</SidebarMenuButton>
+									{/* The cards on the page, so a reader can jump straight to
+									    the one they want. Only the open page lists them, since
+									    all three at once makes the sidebar longer than the
+									    screen and buries the pages themselves. */}
+									{current ? (
+										<SidebarMenuSub>
+											{page.sections.map((section) => (
+												<SidebarMenuSubItem key={section.section}>
+													<SidebarMenuSubButton asChild>
+														<Link
+															href={`${page.path}#${section.section}`}
+															onClick={() => flashSection(section.section)}
+														>
+															<span>{section.title}</span>
+														</Link>
+													</SidebarMenuSubButton>
+												</SidebarMenuSubItem>
+											))}
+										</SidebarMenuSub>
+									) : null}
+								</SidebarMenuItem>
+							</SidebarMenu>
+						</SidebarGroup>
+					);
+				})}
 			</SidebarContent>
 			<SidebarFooter>
 				<DatasetCard />

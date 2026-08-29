@@ -90,7 +90,7 @@ export function AttackCoverage({ className, id }: { className?: string; id?: str
 	}, [report]);
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-4 dark:ring-0", className)} id={id}>
+		<Card className={cn("shadow-none dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Coverage by attack family</CardTitle>
 				<CardDescription>

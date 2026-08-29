@@ -7,60 +7,84 @@ import {
 	GlobeIcon,
 	LayoutGridIcon,
 	ListChecksIcon,
+	RadioIcon,
 	ShieldAlertIcon,
+	SlidersHorizontalIcon,
 	TableIcon,
+	TimerIcon,
 	WavesIcon,
 } from "lucide-react";
 
-export type SidebarNavItem = {
+/** A card on one of the pages, reachable from the sidebar. */
+export type SectionLink = {
 	title: string;
-	/** Id of the dashboard section this entry scrolls to. */
-	section?: string;
-	/** External address, for the links in the sidebar footer. */
-	href?: string;
+	/** Matches the id on the card, and the hash in the address. */
+	section: string;
 	icon?: ReactNode;
-	subItems?: SidebarNavItem[];
 };
 
-export type SidebarNavGroup = {
-	label?: string;
-	items: SidebarNavItem[];
+export type PageLink = {
+	title: string;
+	/** What the page is for, shown under the title in the header. */
+	blurb: string;
+	path: string;
+	icon: ReactNode;
+	sections: SectionLink[];
 };
 
 /**
- * The dashboard is a single page, so navigation scrolls to a section rather
- * than loading a route. Every id here has to match the id on a card in
- * dashboard.tsx, and SECTION_IDS below is what the active entry is tracked
- * against.
+ * The dashboard is split into three pages rather than one long scroll.
+ *
+ * Each page answers a different question, so a reader arriving on one is not
+ * asked to hold the whole system in their head at once, and a screenshot of
+ * any page tells a single story.
  */
-export const navGroups: SidebarNavGroup[] = [
+export const pages: PageLink[] = [
 	{
-		items: [{ title: "Overview", section: "overview", icon: <LayoutGridIcon /> }],
-	},
-	{
-		label: "Live",
-		items: [
-			{ title: "Replay stream", section: "replay", icon: <WavesIcon /> },
-			{ title: "Alerts", section: "alerts", icon: <ShieldAlertIcon /> },
-			{ title: "Rates and latency", section: "rates", icon: <ActivityIcon /> },
-			{ title: "Threat intelligence", section: "intel", icon: <GlobeIcon /> },
+		title: "Overview",
+		blurb: "What the sensor is doing right now",
+		path: "/",
+		icon: <LayoutGridIcon />,
+		sections: [
+			{ title: "Headline numbers", section: "headline", icon: <GaugeIcon /> },
+			{
+				title: "Replay control",
+				section: "replay",
+				icon: <SlidersHorizontalIcon />,
+			},
+			{ title: "Attack mix", section: "mix", icon: <WavesIcon /> },
+			{ title: "Alerts per second", section: "rate", icon: <ActivityIcon /> },
 		],
 	},
 	{
-		label: "Models",
-		items: [
+		title: "Live traffic",
+		blurb: "Who is being flagged, and what is known about them",
+		path: "/live",
+		icon: <RadioIcon />,
+		sections: [
+			{ title: "Alert feed", section: "alerts", icon: <ShieldAlertIcon /> },
+			{ title: "Threat intelligence", section: "intel", icon: <GlobeIcon /> },
 			{
 				title: "Running scoreboard",
 				section: "scoreboard",
 				icon: <ListChecksIcon />,
 			},
+		],
+	},
+	{
+		title: "Models",
+		blurb: "Which detector wins, where, and at what cost",
+		path: "/models",
+		icon: <TableIcon />,
+		sections: [
 			{ title: "Comparison", section: "comparison", icon: <GaugeIcon /> },
 			{ title: "Attack coverage", section: "coverage", icon: <TableIcon /> },
+			{ title: "Inference latency", section: "latency", icon: <TimerIcon /> },
 		],
 	},
 ];
 
-export const footerNavLinks: SidebarNavItem[] = [
+export const footerNavLinks = [
 	{
 		title: "API docs",
 		href: "http://localhost:8000/docs",
@@ -78,12 +102,6 @@ export const footerNavLinks: SidebarNavItem[] = [
 	},
 ];
 
-export const navLinks: SidebarNavItem[] = navGroups.flatMap((group) =>
-	group.items.flatMap((item) =>
-		item.subItems?.length ? [item, ...item.subItems] : [item]
-	)
-);
-
-export const SECTION_IDS = navLinks
-	.map((item) => item.section)
-	.filter((section): section is string => Boolean(section));
+export function findPage(pathname: string): PageLink {
+	return pages.find((page) => page.path === pathname) ?? pages[0];
+}

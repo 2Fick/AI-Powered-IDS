@@ -1,14 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
-import { navLinks } from "@/components/app-shared";
+import { findPage } from "@/components/app-shared";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { StreamIndicator } from "@/components/stream-indicator";
 
-export function AppHeader({ active }: { active: string }) {
-	const current = navLinks.find((item) => item.section === active);
+export function AppHeader() {
+	const page = findPage(usePathname());
 
 	return (
 		<header
@@ -22,12 +23,15 @@ export function AppHeader({ active }: { active: string }) {
 					className="mr-2 h-4 data-[orientation=vertical]:self-center"
 					orientation="vertical"
 				/>
-				<AppBreadcrumbs page={current} />
+				<div className="flex items-baseline gap-3">
+					<span className="font-medium text-sm">{page.title}</span>
+					<span className="hidden text-muted-foreground text-xs md:inline">
+						{page.blurb}
+					</span>
+				</div>
 			</div>
 			<div className="flex items-center gap-3">
-				<span className="hidden text-muted-foreground text-xs sm:inline">
-					Three detectors on the same traffic
-				</span>
+				<StreamIndicator />
 				<ThemeToggle />
 			</div>
 		</header>

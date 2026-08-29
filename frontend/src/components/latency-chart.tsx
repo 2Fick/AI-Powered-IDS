@@ -51,7 +51,7 @@ export function LatencyChart({
 	const latest = stream.history.at(-1);
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)} id={id}>
+		<Card className={cn("shadow-none dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Inference latency</CardTitle>
 				<CardDescription>

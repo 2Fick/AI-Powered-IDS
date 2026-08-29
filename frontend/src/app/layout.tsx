@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AppShell } from "@/components/app-shell";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { themeBootstrapScript } from "@/components/theme-toggle";
 import "./globals.css";
@@ -30,14 +31,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 			<head>
 				{/* Runs before the first paint so the page never flashes the wrong
 				    theme on the way in. */}
-				<script
-					dangerouslySetInnerHTML={{ __html: themeBootstrapScript }}
-					// biome-ignore lint/security/noDangerouslySetInnerHtml: a theme
-					// bootstrap has to run before React hydrates.
-				/>
+				{/* biome-ignore lint/security/noDangerouslySetInnerHtml: a theme
+				    bootstrap has to run before React hydrates. */}
+				<script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
 			</head>
 			<body className="flex min-h-full flex-col">
-				<TooltipProvider>{children}</TooltipProvider>
+				<TooltipProvider>
+					{/* The shell holds the replay connection, so it survives moving
+					    between pages and the running counters keep counting. */}
+					<AppShell>{children}</AppShell>
+				</TooltipProvider>
 			</body>
 		</html>
 	);

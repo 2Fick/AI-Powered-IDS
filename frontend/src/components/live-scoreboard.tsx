@@ -50,7 +50,7 @@ export function LiveScoreboard({
 	const models = stream.stats?.models;
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)} id={id}>
+		<Card className={cn("shadow-none dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Running scoreboard</CardTitle>
 				<CardDescription>
