@@ -184,6 +184,56 @@ very ordinary flow.
 That is the argument for keeping all three rather than shipping the one with
 the best headline number.
 
+## How much does the split flatter these numbers
+
+A random train and test split on CICIDS2017 is generous, and it is worth
+knowing by how much before quoting anything above.
+
+A denial of service burst produces thousands of flows that are identical in
+every feature, so a random split puts copies of the same row on both sides.
+Measured: 2,497,153 distinct feature vectors for 2,827,761 flows, 14.1 percent
+of a random test split has an identical twin in the train half, and 27.8
+percent of the test attacks do.
+
+The second issue is time. A random split lets a model see the first half of an
+attack burst and be graded on the second half. A real sensor is trained on what
+happened before it was deployed and judged on what comes after. Training on the
+earlier part of every capture session and testing on the later part removes
+that.
+
+| Model | Recall random | Recall time ordered | False positives random | False positives time ordered |
+| --- | --- | --- | --- | --- |
+| Random Forest | 99.9% | 98.5% | 0.08% | 0.03% |
+| Isolation Forest | 6.9% | 1.8% | 0.99% | 0.81% |
+| Autoencoder | 43.2% | 22.8% | 1.03% | 0.94% |
+
+The supervised model barely moves, and its false positive rate improves. So the
+duplicates are real but they are not what is producing the headline number: the
+random forest genuinely generalises across the families it was trained on.
+
+The unsupervised models are the ones that lose half their recall or more, and
+that is the honest finding. Their thresholds are fitted on the benign traffic of
+the training window, and benign traffic drifts within a working day, so a
+threshold calibrated on the morning is already slightly wrong by the afternoon.
+Anything deployed this way needs its threshold recalibrated on a rolling window
+rather than fixed once at training time.
+
+Reproduce with:
+
+```bash
+.venv/Scripts/python.exe -m ids.validate
+```
+
+The random split numbers there differ a little from the benchmark table above
+because the script re-splits the whole dataset from scratch, replay rows
+included, and refits everything. The gap between the two is a fair picture of
+how much these figures move with the split alone.
+
+What neither split measures is a genuinely new attack. The random forest works
+under a closed world assumption: it can only recognise the fourteen families it
+was shown. That limitation is the reason the two unsupervised models are in the
+project at all.
+
 ## Reading the code
 
 In this order:
