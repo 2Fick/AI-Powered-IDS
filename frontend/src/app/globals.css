@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -88,37 +88,39 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  /* Near black ground with cards barely lifted off it, which is the look the
+     dashboard block was designed around. */
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.97 0 0);
+  --card: oklch(0.14 0 0);
+  --card-foreground: oklch(0.97 0 0);
+  --popover: oklch(0.14 0 0);
+  --popover-foreground: oklch(0.97 0 0);
+  --primary: oklch(0.97 0 0);
+  --primary-foreground: oklch(0.14 0 0);
+  --secondary: oklch(0.21 0 0);
+  --secondary-foreground: oklch(0.97 0 0);
+  --muted: oklch(0.21 0 0);
+  --muted-foreground: oklch(0.66 0 0);
+  --accent: oklch(0.21 0 0);
+  --accent-foreground: oklch(0.97 0 0);
+  --destructive: oklch(0.68 0.19 22.216);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.55 0 0);
   --chart-1: oklch(0.68 0.15 255);
   --chart-2: oklch(0.72 0.14 175);
   --chart-3: oklch(0.78 0.15 60);
   --chart-4: oklch(0.68 0.18 15);
   --chart-5: oklch(0.68 0.16 305);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.08 0 0);
+  --sidebar-foreground: oklch(0.97 0 0);
+  --sidebar-primary: oklch(0.97 0 0);
+  --sidebar-primary-foreground: oklch(0.14 0 0);
+  --sidebar-accent: oklch(0.19 0 0);
+  --sidebar-accent-foreground: oklch(0.97 0 0);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.55 0 0);
 }
 
 @layer base {
@@ -130,5 +132,28 @@
   }
   html {
     @apply font-sans;
+  }
+}
+/* Picked out for a moment after the sidebar sends the reader to a card. */
+@keyframes section-flash {
+  0% {
+    box-shadow: 0 0 0 0 var(--ring);
+  }
+  15% {
+    box-shadow: 0 0 0 3px var(--ring);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.section-flash {
+  animation: section-flash 1.4s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-flash {
+    animation: none;
+    outline: 2px solid var(--ring);
   }
 }
