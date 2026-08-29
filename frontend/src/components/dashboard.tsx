@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertRateChart } from "@/components/alert-rate-chart";
+import { AttackCoverage } from "@/components/attack-coverage";
 import { AttackMixChart } from "@/components/attack-mix-chart";
 import { DetectionStats } from "@/components/detection-stats";
 import { LatencyChart } from "@/components/latency-chart";
@@ -25,6 +26,7 @@ export function Dashboard() {
 			<LiveAlerts stream={stream} />
 			<LiveScoreboard stream={stream} />
 			<ModelComparison />
+			<AttackCoverage />
 		</div>
 	);
 }

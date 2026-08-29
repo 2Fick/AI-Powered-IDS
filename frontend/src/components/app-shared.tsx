@@ -83,7 +83,7 @@ export const footerNavLinks: SidebarNavItem[] = [
 	},
 	{
 		title: "Source",
-		path: "https://github.com/2Fick/ai-ids-project",
+		path: "https://github.com/2Fick/AI-Powered-IDS",
 		icon: <CodeIcon />,
 	},
 ];
