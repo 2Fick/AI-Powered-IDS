@@ -35,9 +35,11 @@ const chartConfig = {
 export function LatencyChart({
 	stream,
 	className,
+	id,
 }: {
 	stream: StreamSnapshot;
 	className?: string;
+	id?: string;
 }) {
 	const data = stream.history.map((point) => ({
 		label: point.label,
@@ -49,7 +51,7 @@ export function LatencyChart({
 	const latest = stream.history.at(-1);
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)}>
+		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Inference latency</CardTitle>
 				<CardDescription>
@@ -85,6 +87,9 @@ export function LatencyChart({
 							<Line
 								dataKey={name}
 								dot={false}
+								// The series changes every second and restarting the entry
+								// animation each time leaves the chart blank.
+								isAnimationActive={false}
 								key={name}
 								stroke={`var(--color-${name})`}
 								strokeWidth={2}

@@ -31,9 +31,11 @@ const chartConfig = {
 export function AlertRateChart({
 	stream,
 	className,
+	id,
 }: {
 	stream: StreamSnapshot;
 	className?: string;
+	id?: string;
 }) {
 	const data = stream.history.map((point) => ({
 		label: point.label,
@@ -43,7 +45,7 @@ export function AlertRateChart({
 	}));
 
 	return (
-		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)}>
+		<Card className={cn("shadow-none lg:col-span-2 dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Alerts per second</CardTitle>
 				<CardDescription>
@@ -71,6 +73,7 @@ export function AlertRateChart({
 						/>
 						<ChartTooltip content={<ChartTooltipContent />} />
 						<Area
+							isAnimationActive={false}
 							dataKey="random_forest"
 							fill="var(--color-random_forest)"
 							fillOpacity={0.15}
@@ -78,6 +81,7 @@ export function AlertRateChart({
 							type="monotone"
 						/>
 						<Area
+							isAnimationActive={false}
 							dataKey="isolation_forest"
 							fill="var(--color-isolation_forest)"
 							fillOpacity={0.15}
@@ -85,6 +89,7 @@ export function AlertRateChart({
 							type="monotone"
 						/>
 						<Area
+							isAnimationActive={false}
 							dataKey="autoencoder"
 							fill="var(--color-autoencoder)"
 							fillOpacity={0.15}
