@@ -20,7 +20,14 @@ from ids.settings import Settings
 
 # Reports the API serves as they are, each written by the command of the same
 # name. A missing one is normal on a fresh clone, the endpoint says so.
-REPORT_NAMES = ("benchmark", "validation", "sweeps", "curves", "novelty")
+REPORT_NAMES = (
+    "dataset",
+    "benchmark",
+    "validation",
+    "sweeps",
+    "curves",
+    "novelty",
+)
 
 
 def read_report(reports_dir: Path, name: str) -> dict | None:

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
 import sys
 from pathlib import Path
 
@@ -26,6 +27,7 @@ from ids.config import (
     CICIDS2017_FILES,
     LABEL_COLUMN,
     NON_FEATURE_COLUMNS,
+    PROCESSED_DIR,
     RAW_DIR,
     REPORTS_DIR,
 )
@@ -41,7 +43,9 @@ def section(out: io.StringIO, title: str) -> None:
     out.write(f"\n{title}\n{'-' * len(title)}\n")
 
 
-def describe_sessions(out: io.StringIO, raw_dir: Path) -> pd.DataFrame:
+def describe_sessions(
+    out: io.StringIO, raw_dir: Path
+) -> tuple[pd.DataFrame, list[dict]]:
     """One row per capture file: size, time span and attack content."""
     section(out, "Capture sessions")
     frames = []
@@ -71,8 +75,8 @@ def describe_sessions(out: io.StringIO, raw_dir: Path) -> pd.DataFrame:
                 "empty": int(empty.sum()),
                 "attacks": int(attacks.sum()),
                 "attack_share": attacks.sum() / max(int(real.sum()), 1),
-                "from": timestamps.min(),
-                "to": timestamps.max(),
+                "from": str(timestamps.min()),
+                "to": str(timestamps.max()),
                 "families": ", ".join(
                     sorted(frame.loc[attacks, LABEL_COLUMN].unique())
                 )
@@ -103,7 +107,7 @@ def describe_sessions(out: io.StringIO, raw_dir: Path) -> pd.DataFrame:
             " along with every other row that has a missing feature.\n"
         )
 
-    return pd.concat(frames, ignore_index=True)
+    return pd.concat(frames, ignore_index=True), rows
 
 
 def describe_labels(out: io.StringIO, frame: pd.DataFrame) -> None:
@@ -250,9 +254,104 @@ def describe_addresses(out: io.StringIO, frame: pd.DataFrame, top: int = 8) -> N
     )
 
 
+def build_summary(
+    frame: pd.DataFrame, sessions: list[dict], processed_dir: Path
+) -> dict:
+    """The same picture as the text report, shaped for the dashboard to draw.
+
+    The text version is for reading in a terminal before touching the code.
+    This one feeds the charts, so nobody has to take the shape of the data on
+    trust from a paragraph.
+    """
+    labelled = frame[frame[LABEL_COLUMN] != "None"]
+    counts = labelled[LABEL_COLUMN].value_counts()
+
+    feature_columns = [
+        column
+        for column in frame.columns
+        if column not in NON_FEATURE_COLUMNS
+        and column not in (LABEL_COLUMN, "capture_session")
+    ]
+    numeric = frame[feature_columns].apply(pd.to_numeric, errors="coerce")
+    # Count the infinities before they are turned into gaps, otherwise the
+    # cleaning summary reports none of the values it exists to describe.
+    infinite_values = int(
+        np.isinf(numeric.to_numpy(dtype=np.float64, na_value=np.nan)).sum()
+    )
+    numeric = numeric.replace([np.inf, -np.inf], np.nan)
+    real = numeric[~numeric.isna().all(axis=1)]
+
+    median = real.median()
+    p99 = real.quantile(0.99)
+    maximum = real.max()
+    ratio = (maximum / p99.replace(0, np.nan)).sort_values(ascending=False)
+
+    splits = {}
+    for name in ("train", "test", "replay"):
+        path = processed_dir / f"{name}.parquet"
+        if not path.exists():
+            continue
+        part = pd.read_parquet(path, columns=["is_attack"])
+        splits[name] = {
+            "rows": int(len(part)),
+            "attacks": int(part["is_attack"].sum()),
+        }
+
+    attacks = labelled[labelled[LABEL_COLUMN] != BENIGN_LABEL]
+    return {
+        "total_flows": int(len(frame)),
+        "labelled_flows": int(len(labelled)),
+        "padding_rows": int(len(frame) - len(labelled)),
+        "sessions": [
+            {
+                "session": row["session"],
+                "flows": row["flows"],
+                "attacks": row["attacks"],
+                "benign": row["flows"] - row["attacks"],
+                "attack_share": row["attack_share"],
+                "families": row["families"],
+            }
+            for row in sessions
+        ],
+        "families": [
+            {
+                "family": str(label),
+                "flows": int(count),
+                "share": float(count / len(labelled)),
+            }
+            for label, count in counts.items()
+        ],
+        "splits": splits,
+        "skew": [
+            {
+                "feature": str(column),
+                "median": float(median[column]),
+                "p99": float(p99[column]),
+                "max": float(maximum[column]),
+                "max_over_p99": float(ratio[column]),
+            }
+            for column in ratio.head(12).index
+            if np.isfinite(ratio[column])
+        ],
+        "top_attack_sources": [
+            {"ip": str(ip), "flows": int(count)}
+            for ip, count in attacks["Source IP"].value_counts().head(8).items()
+        ],
+        "cleaning": {
+            "infinite_values": infinite_values,
+            "negative_durations": int((real["Flow Duration"] < 0).sum()),
+            "constant_columns": [
+                c for c in feature_columns if numeric[c].nunique(dropna=True) <= 1
+            ],
+            "feature_columns_before_pruning": len(feature_columns),
+        },
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw-dir", type=Path, default=RAW_DIR)
+    parser.add_argument("--processed-dir", type=Path, default=PROCESSED_DIR)
     parser.add_argument(
         "--out",
         type=Path,
@@ -265,7 +364,7 @@ def main(argv: list[str] | None = None) -> int:
     out.write("CICIDS2017 dataset overview\n")
     out.write("===========================\n")
 
-    frame = describe_sessions(out, args.raw_dir)
+    frame, sessions = describe_sessions(out, args.raw_dir)
     out.write(f"\nCombined: {len(frame):,} flows, {len(frame.columns)} columns\n")
 
     describe_labels(out, frame)
@@ -281,7 +380,13 @@ def main(argv: list[str] | None = None) -> int:
         args.out.mkdir(parents=True, exist_ok=True)
         path = args.out / "dataset-overview.txt"
         path.write_text(report, encoding="utf-8")
-        print(f"Written to {path}")
+
+        summary = build_summary(frame, sessions, args.processed_dir)
+        json_path = args.out / "dataset.json"
+        json_path.write_text(
+            json.dumps(summary, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"Written to {path} and {json_path}")
     return 0
 
 

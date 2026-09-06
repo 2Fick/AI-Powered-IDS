@@ -1,0 +1,297 @@
+{
+  "total_flows": 3119345,
+  "labelled_flows": 2830743,
+  "padding_rows": 288602,
+  "sessions": [
+    {
+      "session": "Monday-WorkingHours",
+      "flows": 529918,
+      "attacks": 0,
+      "benign": 529918,
+      "attack_share": 0.0,
+      "families": "none"
+    },
+    {
+      "session": "Tuesday-WorkingHours",
+      "flows": 445909,
+      "attacks": 13835,
+      "benign": 432074,
+      "attack_share": 0.031026509893274188,
+      "families": "FTP-Patator, SSH-Patator"
+    },
+    {
+      "session": "Wednesday-workingHours",
+      "flows": 692703,
+      "attacks": 252672,
+      "benign": 440031,
+      "attack_share": 0.36476238734349353,
+      "families": "DoS GoldenEye, DoS Hulk, DoS Slowhttptest, DoS slowloris, Heartbleed"
+    },
+    {
+      "session": "Thursday-WorkingHours-Morning-WebAttacks",
+      "flows": 170366,
+      "attacks": 2180,
+      "benign": 168186,
+      "attack_share": 0.01279598041862813,
+      "families": "Web Attack Brute Force, Web Attack Sql Injection, Web Attack XSS"
+    },
+    {
+      "session": "Thursday-WorkingHours-Afternoon-Infilteration",
+      "flows": 288602,
+      "attacks": 36,
+      "benign": 288566,
+      "attack_share": 0.00012473926029618645,
+      "families": "Infiltration"
+    },
+    {
+      "session": "Friday-WorkingHours-Morning",
+      "flows": 191033,
+      "attacks": 1966,
+      "benign": 189067,
+      "attack_share": 0.010291415619290908,
+      "families": "Bot"
+    },
+    {
+      "session": "Friday-WorkingHours-Afternoon-PortScan",
+      "flows": 286467,
+      "attacks": 158930,
+      "benign": 127537,
+      "attack_share": 0.5547933967961406,
+      "families": "PortScan"
+    },
+    {
+      "session": "Friday-WorkingHours-Afternoon-DDos",
+      "flows": 225745,
+      "attacks": 128027,
+      "benign": 97718,
+      "attack_share": 0.5671310549513832,
+      "families": "DDoS"
+    }
+  ],
+  "families": [
+    {
+      "family": "BENIGN",
+      "flows": 2273097,
+      "share": 0.8030036637024273
+    },
+    {
+      "family": "DoS Hulk",
+      "flows": 231073,
+      "share": 0.08162980531966342
+    },
+    {
+      "family": "PortScan",
+      "flows": 158930,
+      "share": 0.056144270249895524
+    },
+    {
+      "family": "DDoS",
+      "flows": 128027,
+      "share": 0.04522734843820156
+    },
+    {
+      "family": "DoS GoldenEye",
+      "flows": 10293,
+      "share": 0.003636147824087174
+    },
+    {
+      "family": "FTP-Patator",
+      "flows": 7938,
+      "share": 0.0028042107672791206
+    },
+    {
+      "family": "SSH-Patator",
+      "flows": 5897,
+      "share": 0.0020831986513788077
+    },
+    {
+      "family": "DoS slowloris",
+      "flows": 5796,
+      "share": 0.002047518972933961
+    },
+    {
+      "family": "DoS Slowhttptest",
+      "flows": 5499,
+      "share": 0.0019425995224575314
+    },
+    {
+      "family": "Bot",
+      "flows": 1966,
+      "share": 0.000694517305173942
+    },
+    {
+      "family": "Web Attack Brute Force",
+      "flows": 1507,
+      "share": 0.0005323690635285507
+    },
+    {
+      "family": "Web Attack XSS",
+      "flows": 652,
+      "share": 0.00023032822124791972
+    },
+    {
+      "family": "Infiltration",
+      "flows": 36,
+      "share": 1.2717509148658144e-05
+    },
+    {
+      "family": "Web Attack Sql Injection",
+      "flows": 21,
+      "share": 7.418547003383917e-06
+    },
+    {
+      "family": "Heartbleed",
+      "flows": 11,
+      "share": 3.885905573201099e-06
+    }
+  ],
+  "splits": {
+    "train": {
+      "rows": 2075820,
+      "attacks": 408562
+    },
+    "test": {
+      "rows": 691941,
+      "attacks": 136187
+    },
+    "replay": {
+      "rows": 60000,
+      "attacks": 11807
+    }
+  },
+  "skew": [
+    {
+      "feature": "Total Length of Bwd Packets",
+      "median": 123.0,
+      "p99": 71831.0,
+      "max": 655453030.0,
+      "max_over_p99": 9124.932550013225
+    },
+    {
+      "feature": "Subflow Bwd Bytes",
+      "median": 123.0,
+      "p99": 71831.0,
+      "max": 655453030.0,
+      "max_over_p99": 9124.932550013225
+    },
+    {
+      "feature": "act_data_pkt_fwd",
+      "median": 1.0,
+      "p99": 27.0,
+      "max": 213557.0,
+      "max_over_p99": 7909.518518518518
+    },
+    {
+      "feature": "Subflow Bwd Packets",
+      "median": 2.0,
+      "p99": 57.0,
+      "max": 291922.0,
+      "max_over_p99": 5121.438596491228
+    },
+    {
+      "feature": "Total Backward Packets",
+      "median": 2.0,
+      "p99": 57.0,
+      "max": 291922.0,
+      "max_over_p99": 5121.438596491228
+    },
+    {
+      "feature": "Total Fwd Packets",
+      "median": 2.0,
+      "p99": 48.0,
+      "max": 219759.0,
+      "max_over_p99": 4578.3125
+    },
+    {
+      "feature": "Subflow Fwd Packets",
+      "median": 2.0,
+      "p99": 48.0,
+      "max": 219759.0,
+      "max_over_p99": 4578.3125
+    },
+    {
+      "feature": "Bwd Header Length",
+      "median": 40.0,
+      "p99": 1520.0,
+      "max": 5838440.0,
+      "max_over_p99": 3841.0789473684213
+    },
+    {
+      "feature": "Fwd Header Length",
+      "median": 64.0,
+      "p99": 1328.0,
+      "max": 4644908.0,
+      "max_over_p99": 3497.671686746988
+    },
+    {
+      "feature": "Total Length of Fwd Packets",
+      "median": 62.0,
+      "p99": 11595.0,
+      "max": 12900000.0,
+      "max_over_p99": 1112.54851228978
+    },
+    {
+      "feature": "Subflow Fwd Bytes",
+      "median": 62.0,
+      "p99": 11595.0,
+      "max": 12870338.0,
+      "max_over_p99": 1109.9903406640794
+    },
+    {
+      "feature": "Flow IAT Min",
+      "median": 4.0,
+      "p99": 541413.1600000039,
+      "max": 120000000.0,
+      "max_over_p99": 221.64219281260017
+    }
+  ],
+  "top_attack_sources": [
+    {
+      "ip": "172.16.0.1",
+      "flows": 555641
+    },
+    {
+      "ip": "205.174.165.73",
+      "flows": 705
+    },
+    {
+      "ip": "192.168.10.15",
+      "flows": 371
+    },
+    {
+      "ip": "192.168.10.8",
+      "flows": 307
+    },
+    {
+      "ip": "192.168.10.9",
+      "flows": 226
+    },
+    {
+      "ip": "192.168.10.14",
+      "flows": 209
+    },
+    {
+      "ip": "192.168.10.5",
+      "flows": 180
+    },
+    {
+      "ip": "192.168.10.50",
+      "flows": 3
+    }
+  ],
+  "cleaning": {
+    "infinite_values": 4376,
+    "negative_durations": 115,
+    "constant_columns": [
+      "Bwd PSH Flags",
+      "Bwd URG Flags",
+      "Fwd Avg Bytes/Bulk",
+      "Fwd Avg Packets/Bulk",
+      "Fwd Avg Bulk Rate",
+      "Bwd Avg Bytes/Bulk",
+      "Bwd Avg Packets/Bulk",
+      "Bwd Avg Bulk Rate"
+    ],
+    "feature_columns_before_pruning": 77
+  }
+}

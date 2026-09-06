@@ -4,7 +4,8 @@ Endpoints:
 
   GET  /api/health           liveness and what is loaded
   GET  /api/models           the three models, their thresholds and settings
-  GET  /api/reports/{name}   benchmark, validation, sweeps, curves or novelty
+  GET  /api/reports/{name}   dataset, benchmark, validation, sweeps, curves,
+                             or novelty
   GET  /api/benchmark        shorthand for the benchmark report
   GET  /api/replay/summary   what the live stream is about to replay
   GET  /api/intel/{ip}       threat intelligence for one address
@@ -114,7 +115,9 @@ async def report(name: str, state: AppState = Depends(get_state)) -> dict:
     if content is None:
         raise HTTPException(
             status_code=404,
-            detail=f"no {name} report yet, run: python -m ids.{name}",
+            detail=f"no {name} report yet, run: python -m ids.{name}"
+            if name != "dataset"
+            else "no dataset report yet, run: python -m ids.data.explore --out reports",
         )
     return content
 
