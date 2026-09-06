@@ -44,9 +44,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--processed-dir", type=Path, default=PROCESSED_DIR)
     parser.add_argument("--models-dir", type=Path, default=MODELS_DIR)
     parser.add_argument("--target-fpr", type=float, default=0.01)
-    parser.add_argument("--rf-trees", type=int, default=100)
+    # The sweep in ids.sweep shows recall is flat from a handful of trees
+    # onward while latency climbs with every one added, so the forest is sized
+    # for the latency budget rather than for a round number.
+    parser.add_argument("--rf-trees", type=int, default=50)
     parser.add_argument("--if-trees", type=int, default=200)
-    parser.add_argument("--if-sample-size", type=int, default=4096)
+    # Recall rises all the way to the largest size tried, and the library
+    # default of 256 sits near the worst end of that curve.
+    parser.add_argument("--if-sample-size", type=int, default=16384)
     parser.add_argument("--ae-epochs", type=int, default=20)
     parser.add_argument(
         "--max-train-rows",
@@ -96,8 +101,6 @@ def main(argv: list[str] | None = None) -> int:
 
     print("Training the isolation forest on benign traffic")
     started = time.perf_counter()
-    # The scikit-learn default of 256 samples per tree is far too coarse for a
-    # feature space this wide, and it left the model barely above chance.
     isolation = IsolationForest(
         n_estimators=args.if_trees,
         max_samples=args.if_sample_size,
@@ -161,6 +164,7 @@ def main(argv: list[str] | None = None) -> int:
                 "min_samples_leaf": 2,
                 "class_weight": "balanced_subsample",
             },
+            "chosen_from_sweep": True,
             "isolation_forest": {
                 "n_estimators": args.if_trees,
                 "max_samples": args.if_sample_size,

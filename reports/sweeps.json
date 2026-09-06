@@ -1,0 +1,382 @@
+{
+  "setup": {
+    "train_rows": 400000,
+    "test_rows": 150000,
+    "features": 69,
+    "target_fpr": 0.01,
+    "note": "Sweeps run on a stratified subsample so they finish in minutes. Absolute scores sit a little below the full benchmark, the shape of each curve is the point."
+  },
+  "random_forest_trees": [
+    {
+      "n_estimators": 5,
+      "recall": 0.9975612234529011,
+      "false_positive_rate": 0.0010209417565178417,
+      "roc_auc": 0.9995858171926333,
+      "fit_seconds": 2.324127600004431,
+      "latency_ms": 0.3307999868411571
+    },
+    {
+      "n_estimators": 10,
+      "recall": 0.9976628391423635,
+      "false_positive_rate": 0.0008715356458079135,
+      "roc_auc": 0.9998346016151133,
+      "fit_seconds": 4.551466999982949,
+      "latency_ms": 0.47339999582618475
+    },
+    {
+      "n_estimators": 25,
+      "recall": 0.9977644548318261,
+      "false_positive_rate": 0.0008466346273562588,
+      "roc_auc": 0.9999001239152713,
+      "fit_seconds": 10.189424799988046,
+      "latency_ms": 0.9066499769687653
+    },
+    {
+      "n_estimators": 50,
+      "recall": 0.9975612234529011,
+      "false_positive_rate": 0.0007968325904529495,
+      "roc_auc": 0.9999296710489601,
+      "fit_seconds": 18.85768990003271,
+      "latency_ms": 1.6878499882295728
+    },
+    {
+      "n_estimators": 100,
+      "recall": 0.9976628391423635,
+      "false_positive_rate": 0.0008051329299368344,
+      "roc_auc": 0.9999232978400858,
+      "fit_seconds": 37.65055449999636,
+      "latency_ms": 3.9082500152289867
+    },
+    {
+      "n_estimators": 200,
+      "recall": 0.9976628391423635,
+      "false_positive_rate": 0.000838334287872374,
+      "roc_auc": 0.9999217929941322,
+      "fit_seconds": 76.45937130000675,
+      "latency_ms": 6.695499992929399
+    }
+  ],
+  "isolation_forest_samples": [
+    {
+      "threshold": 0.6266404643697924,
+      "recall": 0.009518002912983098,
+      "false_positive_rate": 0.010408625712791653,
+      "roc_auc": 0.793596146867422,
+      "max_samples": 128,
+      "fit_seconds": 0.6883001999813132
+    },
+    {
+      "threshold": 0.6251386336994009,
+      "recall": 0.0073840734342715845,
+      "false_positive_rate": 0.010101513151887911,
+      "roc_auc": 0.8213960943787887,
+      "max_samples": 256,
+      "fit_seconds": 1.0213124000001699
+    },
+    {
+      "threshold": 0.6181916735180514,
+      "recall": 0.008196998949971208,
+      "false_positive_rate": 0.010217717904662301,
+      "roc_auc": 0.8421690517426348,
+      "max_samples": 512,
+      "fit_seconds": 1.1339215000043623
+    },
+    {
+      "threshold": 0.6071847548404121,
+      "recall": 0.010805134979507502,
+      "false_positive_rate": 0.010392025033823884,
+      "roc_auc": 0.8684189425548502,
+      "max_samples": 1024,
+      "fit_seconds": 1.3477652000146918
+    },
+    {
+      "threshold": 0.5955624118510466,
+      "recall": 0.025132947193713374,
+      "false_positive_rate": 0.010732338952663165,
+      "roc_auc": 0.9004894107946002,
+      "max_samples": 4096,
+      "fit_seconds": 2.4233868999872357
+    },
+    {
+      "threshold": 0.5786059639002032,
+      "recall": 0.1702062798496088,
+      "false_positive_rate": 0.010873444723889207,
+      "roc_auc": 0.9196512928727902,
+      "max_samples": 16384,
+      "fit_seconds": 2.9876649999641813
+    }
+  ],
+  "autoencoder_learning_curve": [
+    {
+      "threshold": 1.2037088871002197,
+      "recall": 0.018087592724316634,
+      "false_positive_rate": 0.010582932841953236,
+      "roc_auc": 0.8394529228786867,
+      "epoch": 1,
+      "loss": 0.5402818432985208
+    },
+    {
+      "threshold": 0.8862380385398865,
+      "recall": 0.0979575246418047,
+      "false_positive_rate": 0.0106576358973082,
+      "roc_auc": 0.8902782246664194,
+      "epoch": 2,
+      "loss": 0.21993496746588975
+    },
+    {
+      "threshold": 0.7095816731452942,
+      "recall": 0.11397893168038478,
+      "false_positive_rate": 0.010890045402856976,
+      "roc_auc": 0.9038075303335524,
+      "epoch": 3,
+      "loss": 0.1411385410107099
+    },
+    {
+      "threshold": 0.53496915102005,
+      "recall": 0.1569284964265149,
+      "false_positive_rate": 0.01072403861317928,
+      "roc_auc": 0.915177630030048,
+      "epoch": 4,
+      "loss": 0.10676133680420044
+    },
+    {
+      "threshold": 0.4391254186630249,
+      "recall": 0.2242319547471463,
+      "false_positive_rate": 0.010699137594727624,
+      "roc_auc": 0.9256845857933976,
+      "epoch": 5,
+      "loss": 0.0873244967407141
+    },
+    {
+      "threshold": 0.4004993438720703,
+      "recall": 0.22389323578227144,
+      "false_positive_rate": 0.010831943026469783,
+      "roc_auc": 0.9310787735192898,
+      "epoch": 6,
+      "loss": 0.07346197141286655
+    },
+    {
+      "threshold": 0.3789985477924347,
+      "recall": 0.22490939267689597,
+      "false_positive_rate": 0.010865144384405322,
+      "roc_auc": 0.9319465212548629,
+      "epoch": 7,
+      "loss": 0.06568535646566978
+    },
+    {
+      "threshold": 0.34962785243988037,
+      "recall": 0.24895843918300986,
+      "false_positive_rate": 0.010840243365953668,
+      "roc_auc": 0.9334299215018567,
+      "epoch": 8,
+      "loss": 0.05980415642261505
+    },
+    {
+      "threshold": 0.33071181178092957,
+      "recall": 0.26061037157470446,
+      "false_positive_rate": 0.010807042008018127,
+      "roc_auc": 0.9293340570887487,
+      "epoch": 9,
+      "loss": 0.053890721347087465
+    },
+    {
+      "threshold": 0.3200305998325348,
+      "recall": 0.27182196931206176,
+      "false_positive_rate": 0.010914946421308632,
+      "roc_auc": 0.9248937810212062,
+      "epoch": 10,
+      "loss": 0.05088519032758016
+    },
+    {
+      "threshold": 0.30776289105415344,
+      "recall": 0.28879178945229145,
+      "false_positive_rate": 0.011105854229437984,
+      "roc_auc": 0.921368108433161,
+      "epoch": 11,
+      "loss": 0.04722603033177364
+    },
+    {
+      "threshold": 0.2938811779022217,
+      "recall": 0.3121633980286556,
+      "false_positive_rate": 0.010956448118728056,
+      "roc_auc": 0.9210437950823716,
+      "epoch": 12,
+      "loss": 0.044575569816888906
+    },
+    {
+      "threshold": 0.28853851556777954,
+      "recall": 0.3000711309826237,
+      "false_positive_rate": 0.011006250155631366,
+      "roc_auc": 0.9191455156238209,
+      "epoch": 13,
+      "loss": 0.04288893508223387
+    },
+    {
+      "threshold": 0.28366389870643616,
+      "recall": 0.3074552044168953,
+      "false_positive_rate": 0.010997949816147481,
+      "roc_auc": 0.9181101425281537,
+      "epoch": 14,
+      "loss": 0.04134438411356547
+    },
+    {
+      "threshold": 0.2793888449668884,
+      "recall": 0.35186126071198726,
+      "false_positive_rate": 0.010973048797695825,
+      "roc_auc": 0.9177571649897227,
+      "epoch": 15,
+      "loss": 0.039958679905304544
+    },
+    {
+      "threshold": 0.27276816964149475,
+      "recall": 0.33634793212071945,
+      "false_positive_rate": 0.010931547100276402,
+      "roc_auc": 0.9174862423925437,
+      "epoch": 16,
+      "loss": 0.03896281424050148
+    },
+    {
+      "threshold": 0.27299878001213074,
+      "recall": 0.34566270365477764,
+      "false_positive_rate": 0.010848543705437553,
+      "roc_auc": 0.9185600771297133,
+      "epoch": 17,
+      "loss": 0.03805828729692178
+    },
+    {
+      "threshold": 0.26997092366218567,
+      "recall": 0.31981844663482706,
+      "false_positive_rate": 0.010923246760792517,
+      "roc_auc": 0.9181916173200126,
+      "epoch": 18,
+      "loss": 0.03753545622412975
+    },
+    {
+      "threshold": 0.26823607087135315,
+      "recall": 0.3336381804017207,
+      "false_positive_rate": 0.010931547100276402,
+      "roc_auc": 0.9170641489171534,
+      "epoch": 19,
+      "loss": 0.036893134411328875
+    },
+    {
+      "threshold": 0.26633569598197937,
+      "recall": 0.3331639738508959,
+      "false_positive_rate": 0.010898345742340861,
+      "roc_auc": 0.9174716768051097,
+      "epoch": 20,
+      "loss": 0.03666970912271585
+    },
+    {
+      "threshold": 0.26664602756500244,
+      "recall": 0.32469599972902485,
+      "false_positive_rate": 0.010890045402856976,
+      "roc_auc": 0.9167513931487803,
+      "epoch": 21,
+      "loss": 0.0367604151654702
+    },
+    {
+      "threshold": 0.26550421118736267,
+      "recall": 0.33241879212817127,
+      "false_positive_rate": 0.010865144384405322,
+      "roc_auc": 0.9185519633320864,
+      "epoch": 22,
+      "loss": 0.036168066975780025
+    },
+    {
+      "threshold": 0.2653466463088989,
+      "recall": 0.33116553195813436,
+      "false_positive_rate": 0.010948147779244171,
+      "roc_auc": 0.9176841921206356,
+      "epoch": 23,
+      "loss": 0.03592914247359985
+    },
+    {
+      "threshold": 0.265329509973526,
+      "recall": 0.33661890729261934,
+      "false_positive_rate": 0.010914946421308632,
+      "roc_auc": 0.9178401530619824,
+      "epoch": 24,
+      "loss": 0.0361536038466371
+    },
+    {
+      "threshold": 0.26500582695007324,
+      "recall": 0.3325204078176337,
+      "false_positive_rate": 0.010881745063373091,
+      "roc_auc": 0.9184236468537152,
+      "epoch": 25,
+      "loss": 0.03562713858599846
+    }
+  ],
+  "autoencoder_latent_dim": [
+    {
+      "threshold": 1.2043389081954956,
+      "recall": 0.009416387223520645,
+      "false_positive_rate": 0.010060011454468488,
+      "roc_auc": 0.8902026424605186,
+      "epoch": 8,
+      "loss": 0.19137742542303526,
+      "latent_dim": 2,
+      "fit_seconds": 29.395127899944782
+    },
+    {
+      "threshold": 0.7678089141845703,
+      "recall": 0.04681096094570335,
+      "false_positive_rate": 0.010499929447114387,
+      "roc_auc": 0.8999013503120082,
+      "epoch": 8,
+      "loss": 0.12071377936846171,
+      "latent_dim": 4,
+      "fit_seconds": 29.695737799978815
+    },
+    {
+      "threshold": 0.4542684853076935,
+      "recall": 0.21379941062900112,
+      "false_positive_rate": 0.010848543705437553,
+      "roc_auc": 0.9243079923569659,
+      "epoch": 8,
+      "loss": 0.08289642068438041,
+      "latent_dim": 8,
+      "fit_seconds": 29.56564410001738
+    },
+    {
+      "threshold": 0.46080446243286133,
+      "recall": 0.24177759712766317,
+      "false_positive_rate": 0.010840243365953668,
+      "roc_auc": 0.9126997623505378,
+      "epoch": 8,
+      "loss": 0.07639860084805733,
+      "latent_dim": 16,
+      "fit_seconds": 28.273875499959104
+    },
+    {
+      "threshold": 0.4055784046649933,
+      "recall": 0.20058937099888222,
+      "false_positive_rate": 0.01098134913717971,
+      "roc_auc": 0.9096550210980654,
+      "epoch": 8,
+      "loss": 0.0663911450940829,
+      "latent_dim": 32,
+      "fit_seconds": 28.754495600005612
+    }
+  ],
+  "chosen": {
+    "random_forest": {
+      "n_estimators": 100
+    },
+    "isolation_forest": {
+      "max_samples": 4096
+    },
+    "autoencoder": {
+      "epochs": 20,
+      "batch_size": 4096,
+      "learning_rate": 0.001,
+      "latent_dim": 8,
+      "hidden_dims": [
+        48,
+        24
+      ],
+      "seed": 42
+    }
+  }
+}
