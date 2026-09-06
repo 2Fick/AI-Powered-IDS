@@ -91,7 +91,7 @@ export function LatencyChart({
 						<YAxis
 							axisLine={false}
 							label={{
-								value: "milliseconds per flow",
+								value: "ms per flow",
 								angle: -90,
 								position: "insideLeft",
 								style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -99,7 +99,7 @@ export function LatencyChart({
 							tickLine={false}
 							tickMargin={8}
 							unit=" ms"
-							width={72}
+							width={84}
 						/>
 						<ChartTooltip content={<ChartTooltipContent />} />
 						<ChartLegend content={<ChartLegendContent />} />

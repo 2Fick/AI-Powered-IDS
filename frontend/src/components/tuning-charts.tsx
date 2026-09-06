@@ -75,7 +75,7 @@ export function ForestSizeChart({
 								axisLine={false}
 								domain={[99, 100]}
 								label={{
-									value: "recall",
+									value: "recall %",
 									angle: -90,
 									position: "insideLeft",
 									style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -83,13 +83,13 @@ export function ForestSizeChart({
 								tickLine={false}
 								tickMargin={8}
 								unit="%"
-								width={64}
+								width={78}
 								yAxisId="recall"
 							/>
 							<YAxis
 								axisLine={false}
 								label={{
-									value: "latency per flow",
+									value: "ms per flow",
 									angle: 90,
 									position: "insideRight",
 									style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -98,7 +98,7 @@ export function ForestSizeChart({
 								tickLine={false}
 								tickMargin={8}
 								unit=" ms"
-								width={76}
+								width={88}
 								yAxisId="latency"
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
@@ -181,7 +181,7 @@ export function IsolationSamplesChart({
 							<YAxis
 								axisLine={false}
 								label={{
-									value: "recall and area under the curve",
+									value: "percent",
 									angle: -90,
 									position: "insideLeft",
 									style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -189,7 +189,7 @@ export function IsolationSamplesChart({
 								tickLine={false}
 								tickMargin={8}
 								unit="%"
-								width={72}
+								width={84}
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
 							<ChartLegend content={<ChartLegendContent />} />
@@ -266,20 +266,20 @@ export function LearningCurveChart({
 							<YAxis
 								axisLine={false}
 								label={{
-									value: "reconstruction loss",
+									value: "loss",
 									angle: -90,
 									position: "insideLeft",
 									style: { fill: "var(--muted-foreground)", fontSize: 11 },
 								}}
 								tickLine={false}
 								tickMargin={8}
-								width={76}
+								width={88}
 								yAxisId="loss"
 							/>
 							<YAxis
 								axisLine={false}
 								label={{
-									value: "recall on attacks",
+									value: "recall %",
 									angle: 90,
 									position: "insideRight",
 									style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -288,7 +288,7 @@ export function LearningCurveChart({
 								tickLine={false}
 								tickMargin={8}
 								unit="%"
-								width={72}
+								width={84}
 								yAxisId="recall"
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
@@ -364,7 +364,7 @@ export function LatentSizeChart({
 							<YAxis
 								axisLine={false}
 								label={{
-									value: "recall on attacks",
+									value: "recall %",
 									angle: -90,
 									position: "insideLeft",
 									style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -372,7 +372,7 @@ export function LatentSizeChart({
 								tickLine={false}
 								tickMargin={8}
 								unit="%"
-								width={64}
+								width={78}
 							/>
 							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
 							<ChartLegend content={<ChartLegendContent />} />

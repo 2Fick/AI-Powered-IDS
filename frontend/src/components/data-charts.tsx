@@ -148,7 +148,7 @@ export function SessionMixChart({
 								tickLine={false}
 								tickMargin={8}
 								type="category"
-								width={112}
+								width={124}
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
 							<ChartLegend content={<ChartLegendContent />} />
@@ -235,7 +235,7 @@ export function FeatureSkewChart({
 								tickLine={false}
 								tickMargin={8}
 								type="category"
-								width={192}
+								width={204}
 							/>
 							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
 							<ChartLegend content={<ChartLegendContent />} />

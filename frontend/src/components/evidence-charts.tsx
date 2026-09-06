@@ -113,14 +113,14 @@ export function RocCurvesChart({
 									axisLine={false}
 									domain={[0, 1]}
 									label={{
-										value: "true positive rate",
+										value: "true positives",
 										angle: -90,
 										position: "insideLeft",
 										style: { fill: "var(--muted-foreground)", fontSize: 11 },
 									}}
 									tickLine={false}
 									tickMargin={8}
-									width={68}
+									width={80}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
 							<ChartLegend content={<ChartLegendContent />} />
@@ -245,7 +245,7 @@ export function ThresholdTradeoffChart({
 								<YAxis
 									axisLine={false}
 									label={{
-										value: "share of flows",
+										value: "share %",
 										angle: -90,
 										position: "insideLeft",
 										style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -253,7 +253,7 @@ export function ThresholdTradeoffChart({
 									tickLine={false}
 									tickMargin={8}
 									unit="%"
-									width={68}
+									width={80}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
 							<ChartLegend content={<ChartLegendContent />} />
@@ -375,7 +375,7 @@ export function ScoreSeparationChart({
 								<YAxis
 									axisLine={false}
 									label={{
-										value: "share of flows",
+										value: "share %",
 										angle: -90,
 										position: "insideLeft",
 										style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -383,7 +383,7 @@ export function ScoreSeparationChart({
 									tickLine={false}
 									tickMargin={8}
 									unit="%"
-									width={68}
+									width={80}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
 							<ChartLegend content={<ChartLegendContent />} />
@@ -585,7 +585,7 @@ export function FeatureDistributionChart({
 								<YAxis
 									axisLine={false}
 									label={{
-										value: "share of flows",
+										value: "share %",
 										angle: -90,
 										position: "insideLeft",
 										style: { fill: "var(--muted-foreground)", fontSize: 11 },
@@ -593,7 +593,7 @@ export function FeatureDistributionChart({
 									tickLine={false}
 									tickMargin={8}
 									unit="%"
-									width={68}
+									width={80}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
 							<ChartLegend content={<ChartLegendContent />} />

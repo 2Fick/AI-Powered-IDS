@@ -83,7 +83,7 @@ export function AlertRateChart({
 							}}
 							tickLine={false}
 							tickMargin={8}
-							width={52}
+							width={64}
 						/>
 						<ChartTooltip content={<ChartTooltipContent />} />
 						<ChartLegend content={<ChartLegendContent />} />
