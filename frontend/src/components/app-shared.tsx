@@ -82,9 +82,9 @@ export const pages: PageLink[] = [
 		sections: [
 			{ title: "Raw files to splits", section: "pipeline" },
 			{ title: "Class balance", section: "balance" },
-			{ title: "Capture sessions", section: "sessions" },
-			{ title: "Feature skew", section: "skew" },
 			{ title: "Feature distributions", section: "features" },
+			{ title: "Feature skew", section: "skew" },
+			{ title: "Capture sessions", section: "sessions" },
 		],
 	},
 	{
@@ -94,9 +94,9 @@ export const pages: PageLink[] = [
 		icon: <TableIcon />,
 		sections: [
 			{ title: "Comparison", section: "comparison", icon: <GaugeIcon /> },
-			{ title: "Inference latency", section: "latency", icon: <TimerIcon /> },
-			{ title: "Attack coverage", section: "coverage", icon: <TableIcon /> },
 			{ title: "What the models look at", section: "importance" },
+			{ title: "Attack coverage", section: "coverage", icon: <TableIcon /> },
+			{ title: "Inference latency", section: "latency", icon: <TimerIcon /> },
 		],
 	},
 	{

@@ -12,12 +12,12 @@ export default function ModelsPage() {
 
 	return (
 		<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-			{/* The comparison table is wide, the latency chart is not, so they
-			    share a row rather than each taking a full one. */}
 			<ModelComparison className="lg:col-span-2" id="comparison" />
-			<LatencyChart id="latency" stream={stream} />
-			<AttackCoverage className="lg:col-span-2" id="coverage" />
 			<FeatureImportanceChart id="importance" />
+			{/* The coverage table is tall, so the latency chart beside it gets a
+			    full height card rather than being squeezed into a short row. */}
+			<AttackCoverage className="lg:col-span-2" id="coverage" />
+			<LatencyChart className="h-full" id="latency" stream={stream} />
 		</div>
 	);
 }

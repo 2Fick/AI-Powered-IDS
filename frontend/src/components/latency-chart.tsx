@@ -53,7 +53,7 @@ export function LatencyChart({
 	const latest = stream.history.at(-1);
 
 	return (
-		<Card className={cn("shadow-none dark:ring-0", className)} id={id}>
+		<Card className={cn("flex flex-col shadow-none dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>Inference latency</CardTitle>
 				<CardDescription>
@@ -66,8 +66,13 @@ export function LatencyChart({
 						: ""}
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
-				<ChartContainer className="h-64 w-full" config={chartConfig}>
+			{/* Grows to whatever height the card is given, with a floor so it
+			    stays readable when the card is short. */}
+			<CardContent className="flex-1">
+				<ChartContainer
+					className="h-full min-h-64 w-full"
+					config={chartConfig}
+				>
 					<LineChart accessibilityLayer data={data}>
 						<CartesianGrid vertical={false} />
 						<XAxis
