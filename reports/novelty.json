@@ -1,0 +1,109 @@
+{
+  "train_rows": 500001,
+  "test_rows": 200000,
+  "target_fpr": 0.01,
+  "results": [
+    {
+      "family": "PortScan",
+      "training_rows": 471924,
+      "held_out_flows": 11231,
+      "seconds": 92.97550090000732,
+      "recall_on_unseen": {
+        "random_forest": 0.00026711779894933663,
+        "isolation_forest": 0.0014246282610631288,
+        "autoencoder": 0.0020479031252782476
+      },
+      "false_positive_rate": {
+        "random_forest": 0.0004419930775168704,
+        "isolation_forest": 0.010495779277372445,
+        "autoencoder": 0.010445977240469135
+      },
+      "best_single_model": 0.0020479031252782476
+    },
+    {
+      "family": "DDoS",
+      "training_rows": 477369,
+      "held_out_flows": 9053,
+      "seconds": 88.91654890001519,
+      "recall_on_unseen": {
+        "random_forest": 0.639346073124931,
+        "isolation_forest": 0.018557384292499726,
+        "autoencoder": 0.33668397216392354
+      },
+      "false_positive_rate": {
+        "random_forest": 0.0007781568266142085,
+        "isolation_forest": 0.010495779277372445,
+        "autoencoder": 0.010744789461888992
+      },
+      "best_single_model": 0.639346073124931
+    },
+    {
+      "family": "Bot",
+      "training_rows": 499655,
+      "held_out_flows": 138,
+      "seconds": 90.18829189997632,
+      "recall_on_unseen": {
+        "random_forest": 0.0,
+        "isolation_forest": 0.021739130434782608,
+        "autoencoder": 0.0
+      },
+      "false_positive_rate": {
+        "random_forest": 0.0006412012251301078,
+        "isolation_forest": 0.010483328768146618,
+        "autoencoder": 0.010638960133469459
+      },
+      "best_single_model": 0.021739130434782608
+    },
+    {
+      "family": "FTP-Patator",
+      "training_rows": 498600,
+      "held_out_flows": 561,
+      "seconds": 88.12053080002079,
+      "recall_on_unseen": {
+        "random_forest": 0.0,
+        "isolation_forest": 0.0,
+        "autoencoder": 0.0
+      },
+      "false_positive_rate": {
+        "random_forest": 0.0007968325904529495,
+        "isolation_forest": 0.010495779277372445,
+        "autoencoder": 0.010620284369630717
+      },
+      "best_single_model": 0.0
+    },
+    {
+      "family": "DoS slowloris",
+      "training_rows": 498976,
+      "held_out_flows": 410,
+      "seconds": 91.85307740001008,
+      "recall_on_unseen": {
+        "random_forest": 0.8975609756097561,
+        "isolation_forest": 0.32195121951219513,
+        "autoencoder": 0.2804878048780488
+      },
+      "false_positive_rate": {
+        "random_forest": 0.0007781568266142085,
+        "isolation_forest": 0.010483328768146618,
+        "autoencoder": 0.010626509624243632
+      },
+      "best_single_model": 0.8975609756097561
+    },
+    {
+      "family": "Web Attack Brute Force",
+      "training_rows": 499732,
+      "held_out_flows": 107,
+      "seconds": 92.82354850001866,
+      "recall_on_unseen": {
+        "random_forest": 0.8037383177570093,
+        "isolation_forest": 0.0,
+        "autoencoder": 0.0
+      },
+      "false_positive_rate": {
+        "random_forest": 0.0007781568266142085,
+        "isolation_forest": 0.01053935605966284,
+        "autoencoder": 0.010576707587340322
+      },
+      "best_single_model": 0.8037383177570093
+    }
+  ]
+}

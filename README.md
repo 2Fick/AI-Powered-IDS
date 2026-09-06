@@ -225,6 +225,54 @@ flow is ordinary for its port.
 That is the argument for keeping all three rather than shipping the one with
 the best headline number.
 
+## What happens on an attack nobody trained on
+
+```bash
+.venv/Scripts/python.exe -m ids.novelty
+```
+
+The random forest works under a closed world assumption. It can only recognise
+the families it was shown, and real traffic does not agree to stay inside a
+training set. So one family at a time is removed from training, all three
+models are refitted on what is left, and each is asked about the family none of
+them was told about.
+
+| Held out family | Flows | Random Forest | Isolation Forest | Autoencoder |
+| --- | --- | --- | --- | --- |
+| PortScan | 11,231 | 0.0% | 0.1% | 0.2% |
+| DDoS | 9,053 | 63.9% | 1.9% | 33.7% |
+| Bot | 138 | 0.0% | 2.2% | 0.0% |
+| FTP-Patator | 561 | 0.0% | 0.0% | 0.0% |
+| DoS slowloris | 410 | 89.8% | 32.2% | 28.0% |
+| Web Attack Brute Force | 107 | 80.4% | 0.0% | 0.0% |
+
+This did not come out the way the pitch for an ensemble usually goes, and the
+result is more useful than that pitch would have been.
+
+**The supervised model does not fail gracefully, it fails unpredictably.** On
+three of the six families it drops from near perfect to zero. On the other
+three it holds up, and the pattern behind that is not subtle: it generalises
+when something structurally similar is still in the training data. DDoS
+survives because DoS Hulk is still there. Slowloris survives because the other
+slow denial of service families are. Web brute force survives because cross
+site scripting and SQL injection are. PortScan, Bot and FTP-Patator have no
+close relative left, and the model goes to zero on all three.
+
+**The unsupervised models are not a safety net either.** They add something
+real on two families, 33.7 percent on DDoS and 32.2 percent on slowloris, and
+nothing at all on the other four. A port scan or a single bot callback is a
+small, ordinary looking flow, and asking whether a flow is unusual in general
+is not the same question as asking whether it is unusual for its port.
+
+So the honest conclusion is not that three models cover each other. It is that
+none of these approaches handles a genuinely new attack on its own, and a
+system built on them needs a retraining pipeline and human review rather than a
+detector that is assumed to catch the unknown. Where the ensemble does earn its
+place is narrower and measurable: on the rare families in the main benchmark,
+where the autoencoder reaches 89 percent on Infiltration against the forest's
+67, and on the two families above where it recovers a third of what the
+supervised model lost.
+
 ## How much does the split flatter these numbers
 
 A random train and test split on CICIDS2017 is generous, and it is worth
