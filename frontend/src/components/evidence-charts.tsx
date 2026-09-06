@@ -471,10 +471,16 @@ export function FeatureImportanceChart({
 							<YAxis
 								axisLine={false}
 								dataKey="feature"
+								label={{
+									value: "feature",
+									angle: -90,
+									position: "insideLeft",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								tickLine={false}
 								tickMargin={8}
 								type="category"
-								width={168}
+								width={182}
 							/>
 							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
 							<ChartLegend content={<ChartLegendContent />} />

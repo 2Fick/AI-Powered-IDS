@@ -11,6 +11,8 @@ import {
 import {
 	type ChartConfig,
 	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -62,6 +64,32 @@ export type DatasetReport = {
 const BENIGN = "var(--chart-1)";
 const ATTACK = "var(--chart-4)";
 
+/**
+ * Shorten a capture session name to something an axis can hold.
+ *
+ * The raw names run to thirty characters, wrap onto two lines and end up
+ * unreadable stacked eight deep.
+ */
+function shortSessionName(session: string): string {
+	const day = session.slice(0, 3);
+	if (session.includes("WebAttacks")) {
+		return `${day} am, web`;
+	}
+	if (session.includes("Infilteration")) {
+		return `${day} pm, infil`;
+	}
+	if (session.includes("PortScan")) {
+		return `${day} pm, scan`;
+	}
+	if (session.includes("DDos")) {
+		return `${day} pm, DDoS`;
+	}
+	if (session.includes("Morning")) {
+		return `${day} am`;
+	}
+	return day;
+}
+
 /** Benign against attack traffic in each of the eight capture sessions. */
 export function SessionMixChart({
 	className,
@@ -88,10 +116,7 @@ export function SessionMixChart({
 		>
 			{(data) => {
 				const rows = data.sessions.map((row) => ({
-					session: row.session
-						.replace("-WorkingHours", "")
-						.replace("-Afternoon", " pm")
-						.replace("-Morning", " am"),
+					session: shortSessionName(row.session),
 					benign: row.benign,
 					attacks: row.attacks,
 				}));
@@ -114,12 +139,19 @@ export function SessionMixChart({
 							<YAxis
 								axisLine={false}
 								dataKey="session"
+								label={{
+									value: "capture session",
+									angle: -90,
+									position: "insideLeft",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								tickLine={false}
 								tickMargin={8}
 								type="category"
-								width={148}
+								width={112}
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
 							<Bar
 								dataKey="benign"
 								fill="var(--color-benign)"
@@ -194,12 +226,19 @@ export function FeatureSkewChart({
 							<YAxis
 								axisLine={false}
 								dataKey="feature"
+								label={{
+									value: "feature",
+									angle: -90,
+									position: "insideLeft",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								tickLine={false}
 								tickMargin={8}
 								type="category"
-								width={196}
+								width={192}
 							/>
 							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
+							<ChartLegend content={<ChartLegendContent />} />
 							<Bar
 								dataKey="ratio"
 								fill="var(--color-ratio)"
