@@ -93,7 +93,7 @@ export function AttackMixChart({
 					</p>
 				) : (
 					<ChartContainer
-						className="mx-auto aspect-square max-h-64 w-full"
+						className="mx-auto h-56 w-full"
 						config={chartConfig}
 					>
 						<PieChart accessibilityLayer>

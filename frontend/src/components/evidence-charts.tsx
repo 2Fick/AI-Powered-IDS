@@ -90,7 +90,7 @@ export function RocCurvesChart({
 				return (
 					<>
 						<ChartContainer
-							className="aspect-video w-full"
+							className="h-64 w-full"
 							config={MODEL_CONFIG}
 						>
 							<LineChart accessibilityLayer data={rows}>
@@ -110,9 +110,15 @@ export function RocCurvesChart({
 								<YAxis
 									axisLine={false}
 									domain={[0, 1]}
+									label={{
+										value: "true positive rate",
+										angle: -90,
+										position: "insideLeft",
+										style: { fill: "var(--muted-foreground)", fontSize: 11 },
+									}}
 									tickLine={false}
 									tickMargin={8}
-									width={44}
+									width={68}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
 								<ReferenceLine
@@ -219,7 +225,7 @@ export function ThresholdTradeoffChart({
 								</SelectContent>
 							</Select>
 						</div>
-						<ChartContainer className="aspect-video w-full" config={config}>
+						<ChartContainer className="h-64 w-full" config={config}>
 							<LineChart accessibilityLayer data={rows}>
 								<CartesianGrid vertical={false} />
 								<XAxis
@@ -235,10 +241,16 @@ export function ThresholdTradeoffChart({
 								/>
 								<YAxis
 									axisLine={false}
+									label={{
+										value: "share of flows",
+										angle: -90,
+										position: "insideLeft",
+										style: { fill: "var(--muted-foreground)", fontSize: 11 },
+									}}
 									tickLine={false}
 									tickMargin={8}
 									unit="%"
-									width={52}
+									width={68}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
 								{chosenAt !== undefined ? (
@@ -341,7 +353,7 @@ export function ScoreSeparationChart({
 								</SelectContent>
 							</Select>
 						</div>
-						<ChartContainer className="aspect-video w-full" config={config}>
+						<ChartContainer className="h-64 w-full" config={config}>
 							<AreaChart accessibilityLayer data={rows}>
 								<CartesianGrid vertical={false} />
 								<XAxis
@@ -358,10 +370,16 @@ export function ScoreSeparationChart({
 								/>
 								<YAxis
 									axisLine={false}
+									label={{
+										value: "share of flows",
+										angle: -90,
+										position: "insideLeft",
+										style: { fill: "var(--muted-foreground)", fontSize: 11 },
+									}}
 									tickLine={false}
 									tickMargin={8}
 									unit="%"
-									width={52}
+									width={68}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
 								<ReferenceLine
@@ -429,11 +447,17 @@ export function FeatureImportanceChart({
 					importance: Number((row.importance * 100).toFixed(2)),
 				}));
 				return (
-					<ChartContainer className="aspect-[4/3] w-full" config={config}>
+					<ChartContainer className="h-80 w-full" config={config}>
 						<BarChart accessibilityLayer data={rows} layout="vertical">
 							<CartesianGrid horizontal={false} />
 							<XAxis
 								axisLine={false}
+								label={{
+									value: "share of the decision",
+									position: "insideBottom",
+									offset: -4,
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								tickLine={false}
 								tickMargin={8}
 								type="number"
@@ -526,7 +550,7 @@ export function FeatureDistributionChart({
 								</SelectContent>
 							</Select>
 						</div>
-						<ChartContainer className="aspect-video w-full" config={config}>
+						<ChartContainer className="h-64 w-full" config={config}>
 							<AreaChart accessibilityLayer data={rows}>
 								<CartesianGrid vertical={false} />
 								<XAxis
@@ -543,10 +567,16 @@ export function FeatureDistributionChart({
 								/>
 								<YAxis
 									axisLine={false}
+									label={{
+										value: "share of flows",
+										angle: -90,
+										position: "insideLeft",
+										style: { fill: "var(--muted-foreground)", fontSize: 11 },
+									}}
 									tickLine={false}
 									tickMargin={8}
 									unit="%"
-									width={52}
+									width={68}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
 								<Area

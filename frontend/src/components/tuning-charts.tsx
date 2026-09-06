@@ -59,7 +59,7 @@ export function ForestSizeChart({
 					latency: Number(row.latency_ms.toFixed(2)),
 				}));
 				return (
-					<ChartContainer className="aspect-video w-full" config={config}>
+					<ChartContainer className="h-60 w-full" config={config}>
 						<LineChart accessibilityLayer data={rows}>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -72,19 +72,31 @@ export function ForestSizeChart({
 							<YAxis
 								axisLine={false}
 								domain={[99, 100]}
+								label={{
+									value: "recall",
+									angle: -90,
+									position: "insideLeft",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								tickLine={false}
 								tickMargin={8}
 								unit="%"
-								width={52}
+								width={64}
 								yAxisId="recall"
 							/>
 							<YAxis
 								axisLine={false}
+								label={{
+									value: "latency per flow",
+									angle: 90,
+									position: "insideRight",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								orientation="right"
 								tickLine={false}
 								tickMargin={8}
 								unit=" ms"
-								width={56}
+								width={76}
 								yAxisId="latency"
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
@@ -149,7 +161,7 @@ export function IsolationSamplesChart({
 					auc: percent(row.roc_auc),
 				}));
 				return (
-					<ChartContainer className="aspect-video w-full" config={config}>
+					<ChartContainer className="h-60 w-full" config={config}>
 						<LineChart accessibilityLayer data={rows}>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -165,10 +177,16 @@ export function IsolationSamplesChart({
 							/>
 							<YAxis
 								axisLine={false}
+								label={{
+									value: "recall and area under the curve",
+									angle: -90,
+									position: "insideLeft",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								tickLine={false}
 								tickMargin={8}
 								unit="%"
-								width={52}
+								width={72}
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
 							<Line
@@ -231,7 +249,7 @@ export function LearningCurveChart({
 					recall: percent(row.recall),
 				}));
 				return (
-					<ChartContainer className="aspect-video w-full" config={config}>
+					<ChartContainer className="h-60 w-full" config={config}>
 						<LineChart accessibilityLayer data={rows}>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -243,18 +261,30 @@ export function LearningCurveChart({
 							/>
 							<YAxis
 								axisLine={false}
+								label={{
+									value: "reconstruction loss",
+									angle: -90,
+									position: "insideLeft",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								tickLine={false}
 								tickMargin={8}
-								width={64}
+								width={76}
 								yAxisId="loss"
 							/>
 							<YAxis
 								axisLine={false}
+								label={{
+									value: "recall on attacks",
+									angle: 90,
+									position: "insideRight",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								orientation="right"
 								tickLine={false}
 								tickMargin={8}
 								unit="%"
-								width={52}
+								width={72}
 								yAxisId="recall"
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
@@ -312,7 +342,7 @@ export function LatentSizeChart({
 					recall: percent(row.recall),
 				}));
 				return (
-					<ChartContainer className="aspect-video w-full" config={config}>
+					<ChartContainer className="h-60 w-full" config={config}>
 						<BarChart accessibilityLayer data={rows}>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -328,10 +358,16 @@ export function LatentSizeChart({
 							/>
 							<YAxis
 								axisLine={false}
+								label={{
+									value: "recall on attacks",
+									angle: -90,
+									position: "insideLeft",
+									style: { fill: "var(--muted-foreground)", fontSize: 11 },
+								}}
 								tickLine={false}
 								tickMargin={8}
 								unit="%"
-								width={52}
+								width={64}
 							/>
 							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
 							<Bar

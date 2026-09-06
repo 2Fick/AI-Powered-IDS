@@ -65,7 +65,7 @@ export function LatencyChart({
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<ChartContainer className="aspect-video w-full" config={chartConfig}>
+				<ChartContainer className="h-64 w-full" config={chartConfig}>
 					<LineChart accessibilityLayer data={data}>
 						<CartesianGrid vertical={false} />
 						<XAxis
@@ -77,10 +77,16 @@ export function LatencyChart({
 						/>
 						<YAxis
 							axisLine={false}
+							label={{
+								value: "milliseconds per flow",
+								angle: -90,
+								position: "insideLeft",
+								style: { fill: "var(--muted-foreground)", fontSize: 11 },
+							}}
 							tickLine={false}
 							tickMargin={8}
 							unit=" ms"
-							width={52}
+							width={72}
 						/>
 						<ChartTooltip content={<ChartTooltipContent />} />
 						{MODEL_ORDER.map((name: ModelName) => (

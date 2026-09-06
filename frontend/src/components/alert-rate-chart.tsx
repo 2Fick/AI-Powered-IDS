@@ -54,7 +54,7 @@ export function AlertRateChart({
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<ChartContainer className="aspect-video w-full" config={chartConfig}>
+				<ChartContainer className="h-64 w-full" config={chartConfig}>
 					<AreaChart accessibilityLayer data={data}>
 						<CartesianGrid vertical={false} />
 						<XAxis
@@ -67,9 +67,15 @@ export function AlertRateChart({
 						<YAxis
 							allowDecimals={false}
 							axisLine={false}
+							label={{
+								value: "alerts",
+								angle: -90,
+								position: "insideLeft",
+								style: { fill: "var(--muted-foreground)", fontSize: 11 },
+							}}
 							tickLine={false}
 							tickMargin={8}
-							width={28}
+							width={52}
 						/>
 						<ChartTooltip content={<ChartTooltipContent />} />
 						<Area
