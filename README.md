@@ -30,6 +30,7 @@ the supervised one, and what it costs to decide.
 | API | FastAPI, REST plus a WebSocket that replays traffic |
 | Dashboard | Next.js and shadcn, five pages, one question each |
 | Threat intel | VirusTotal, AbuseIPDB, Shodan and GreyNoise |
+| Written report | Five pages in LaTeX, figures drawn from the same JSON |
 
 Everything used here is free. Two of the four intelligence sources need no
 account at all.
@@ -378,6 +379,22 @@ of the capture as a whole. Chronological order is still available with
 benign traffic only, and both take their threshold from the benign score
 distribution at the same target false positive rate. Without that they would be
 compared at whatever operating point each library happened to default to.
+
+## The written report
+
+A five page comparison in [report/main.tex](report/main.tex), covering the
+dataset and the preprocessing decisions, the three models, the hyperparameter
+study, the results and the two validation experiments. Every figure is drawn by
+a command from the same JSON the dashboard reads, so the paper and the browser
+cannot tell different stories.
+
+```bash
+.venv/Scripts/python.exe -m ids.report.figures
+cd report && pdflatex -output-directory=build main.tex
+```
+
+Run pdflatex twice so the figure references resolve. Needs a LaTeX distribution
+and `matplotlib`, which is in `requirements-dev.txt`.
 
 ## Tests
 
