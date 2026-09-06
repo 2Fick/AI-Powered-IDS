@@ -12,6 +12,8 @@ import {
 import {
 	type ChartConfig,
 	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -60,6 +62,12 @@ export function AlertRateChart({
 						<XAxis
 							axisLine={false}
 							dataKey="label"
+							label={{
+								value: "clock time",
+								position: "insideBottom",
+								offset: -4,
+								style: { fill: "var(--muted-foreground)", fontSize: 11 },
+							}}
 							minTickGap={24}
 							tickLine={false}
 							tickMargin={8}
@@ -78,6 +86,7 @@ export function AlertRateChart({
 							width={52}
 						/>
 						<ChartTooltip content={<ChartTooltipContent />} />
+						<ChartLegend content={<ChartLegendContent />} />
 						<Area
 							isAnimationActive={false}
 							dataKey="random_forest"

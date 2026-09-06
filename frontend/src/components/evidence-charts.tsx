@@ -16,6 +16,8 @@ import {
 import {
 	type ChartConfig,
 	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -90,7 +92,7 @@ export function RocCurvesChart({
 				return (
 					<>
 						<ChartContainer
-							className="h-64 w-full"
+							className="h-56 w-full"
 							config={MODEL_CONFIG}
 						>
 							<LineChart accessibilityLayer data={rows}>
@@ -121,6 +123,7 @@ export function RocCurvesChart({
 									width={68}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
 								<ReferenceLine
 									segment={[
 										{ x: 0, y: 0 },
@@ -225,7 +228,7 @@ export function ThresholdTradeoffChart({
 								</SelectContent>
 							</Select>
 						</div>
-						<ChartContainer className="h-64 w-full" config={config}>
+						<ChartContainer className="h-56 w-full" config={config}>
 							<LineChart accessibilityLayer data={rows}>
 								<CartesianGrid vertical={false} />
 								<XAxis
@@ -253,6 +256,7 @@ export function ThresholdTradeoffChart({
 									width={68}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
 								{chosenAt !== undefined ? (
 									<ReferenceLine
 										label={{
@@ -353,7 +357,7 @@ export function ScoreSeparationChart({
 								</SelectContent>
 							</Select>
 						</div>
-						<ChartContainer className="h-64 w-full" config={config}>
+						<ChartContainer className="h-56 w-full" config={config}>
 							<AreaChart accessibilityLayer data={rows}>
 								<CartesianGrid vertical={false} />
 								<XAxis
@@ -382,6 +386,7 @@ export function ScoreSeparationChart({
 									width={68}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
 								<ReferenceLine
 									label={{
 										value: "threshold",
@@ -447,7 +452,7 @@ export function FeatureImportanceChart({
 					importance: Number((row.importance * 100).toFixed(2)),
 				}));
 				return (
-					<ChartContainer className="h-80 w-full" config={config}>
+					<ChartContainer className="h-72 w-full" config={config}>
 						<BarChart accessibilityLayer data={rows} layout="vertical">
 							<CartesianGrid horizontal={false} />
 							<XAxis
@@ -472,6 +477,7 @@ export function FeatureImportanceChart({
 								width={168}
 							/>
 							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
+							<ChartLegend content={<ChartLegendContent />} />
 							<Bar
 								dataKey="importance"
 								fill="var(--color-importance)"
@@ -550,7 +556,7 @@ export function FeatureDistributionChart({
 								</SelectContent>
 							</Select>
 						</div>
-						<ChartContainer className="h-64 w-full" config={config}>
+						<ChartContainer className="h-56 w-full" config={config}>
 							<AreaChart accessibilityLayer data={rows}>
 								<CartesianGrid vertical={false} />
 								<XAxis
@@ -579,6 +585,7 @@ export function FeatureDistributionChart({
 									width={68}
 								/>
 								<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
 								<Area
 									dataKey="benign"
 									fill="var(--color-benign)"

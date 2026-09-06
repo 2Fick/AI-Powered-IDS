@@ -12,6 +12,8 @@ import {
 import {
 	type ChartConfig,
 	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -59,7 +61,7 @@ export function ForestSizeChart({
 					latency: Number(row.latency_ms.toFixed(2)),
 				}));
 				return (
-					<ChartContainer className="h-60 w-full" config={config}>
+					<ChartContainer className="h-52 w-full" config={config}>
 						<LineChart accessibilityLayer data={rows}>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -100,6 +102,7 @@ export function ForestSizeChart({
 								yAxisId="latency"
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
 							<Line
 								dataKey="recall"
 								isAnimationActive={false}
@@ -161,7 +164,7 @@ export function IsolationSamplesChart({
 					auc: percent(row.roc_auc),
 				}));
 				return (
-					<ChartContainer className="h-60 w-full" config={config}>
+					<ChartContainer className="h-52 w-full" config={config}>
 						<LineChart accessibilityLayer data={rows}>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -189,6 +192,7 @@ export function IsolationSamplesChart({
 								width={72}
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
 							<Line
 								dataKey="auc"
 								isAnimationActive={false}
@@ -249,7 +253,7 @@ export function LearningCurveChart({
 					recall: percent(row.recall),
 				}));
 				return (
-					<ChartContainer className="h-60 w-full" config={config}>
+					<ChartContainer className="h-52 w-full" config={config}>
 						<LineChart accessibilityLayer data={rows}>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -288,6 +292,7 @@ export function LearningCurveChart({
 								yAxisId="recall"
 							/>
 							<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
 							<Line
 								dataKey="loss"
 								isAnimationActive={false}
@@ -342,7 +347,7 @@ export function LatentSizeChart({
 					recall: percent(row.recall),
 				}));
 				return (
-					<ChartContainer className="h-60 w-full" config={config}>
+					<ChartContainer className="h-52 w-full" config={config}>
 						<BarChart accessibilityLayer data={rows}>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -370,6 +375,7 @@ export function LatentSizeChart({
 								width={64}
 							/>
 							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
+							<ChartLegend content={<ChartLegendContent />} />
 							<Bar
 								dataKey="recall"
 								fill="var(--color-recall)"

@@ -12,6 +12,8 @@ import {
 import {
 	type ChartConfig,
 	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -71,6 +73,12 @@ export function LatencyChart({
 						<XAxis
 							axisLine={false}
 							dataKey="label"
+							label={{
+								value: "clock time",
+								position: "insideBottom",
+								offset: -4,
+								style: { fill: "var(--muted-foreground)", fontSize: 11 },
+							}}
 							minTickGap={24}
 							tickLine={false}
 							tickMargin={8}
@@ -89,6 +97,7 @@ export function LatencyChart({
 							width={72}
 						/>
 						<ChartTooltip content={<ChartTooltipContent />} />
+						<ChartLegend content={<ChartLegendContent />} />
 						{MODEL_ORDER.map((name: ModelName) => (
 							<Line
 								dataKey={name}
