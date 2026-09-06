@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/banner.svg" alt="The same flow enters three detectors and they return different verdicts" width="620">
+<img src="docs/mascot.svg" alt="A shield watching network traffic go past" width="150">
 
 # AI-Powered IDS
 
