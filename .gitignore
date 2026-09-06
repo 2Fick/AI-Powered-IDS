@@ -32,3 +32,4 @@ Thumbs.db
 
 # LaTeX build output
 report/build/
+!report/report.pdf

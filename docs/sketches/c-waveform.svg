@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 160" width="760" height="160" role="img" aria-label="A traffic waveform scrolling past a detection threshold, spiking red when an attack crosses it">
+  <title>Sketch C, traffic against a threshold</title>
+  <defs>
+    <linearGradient id="c-fade-left" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0d1a2e" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0d1a2e" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="c-fade-right" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0d1a2e" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0d1a2e" stop-opacity="1"/>
+    </linearGradient>
+    <clipPath id="c-clip"><rect x="0" y="0" width="760" height="160" rx="14"/></clipPath>
+  </defs>
+  <style>
+    .lbl { font: 600 10px system-ui, -apple-system, Segoe UI, sans-serif; fill: #8296b5; letter-spacing: .08em; }
+  </style>
+
+  <rect x="0" y="0" width="760" height="160" rx="14" fill="#0d1a2e"/>
+
+  <g clip-path="url(#c-clip)">
+    <!-- Two copies of the same trace, one behind the other, so the scroll
+         never shows a seam. -->
+    <g>
+      <animateTransform attributeName="transform" type="translate"
+                        values="0 0; -760 0" dur="9s" repeatCount="indefinite"/>
+      <g>
+        <path d="M0 108 l24 -6 l22 9 l26 -12 l20 7 l28 -5 l24 8 l26 -10 l22 6 l30 -4
+                 l26 9 l22 -48 l14 62 l22 -14 l26 5 l24 -8 l28 7 l26 -5 l24 9 l30 -7
+                 l26 6 l24 -9 l28 7 l26 -4 l24 8 l30 -6 l26 5 l24 -7 l28 6"
+              fill="none" stroke="#5b91e8" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M760 108 l24 -6 l22 9 l26 -12 l20 7 l28 -5 l24 8 l26 -10 l22 6 l30 -4
+                 l26 9 l22 -48 l14 62 l22 -14 l26 5 l24 -8 l28 7 l26 -5 l24 9 l30 -7
+                 l26 6 l24 -9 l28 7 l26 -4 l24 8 l30 -6 l26 5 l24 -7 l28 6"
+              fill="none" stroke="#5b91e8" stroke-width="2" stroke-linejoin="round"/>
+      </g>
+    </g>
+
+    <!-- The threshold, and the part of the trace that breaks through it. -->
+    <line x1="0" y1="64" x2="760" y2="64" stroke="#e05a45" stroke-width="1.5" stroke-dasharray="6 6"/>
+
+    <g>
+      <animateTransform attributeName="transform" type="translate"
+                        values="0 0; -760 0" dur="9s" repeatCount="indefinite"/>
+      <g fill="#e05a45">
+        <circle cx="286" cy="55" r="5"/>
+        <circle cx="1046" cy="55" r="5"/>
+      </g>
+      <g fill="none" stroke="#e05a45" stroke-width="2">
+        <circle cx="286" cy="55" r="5">
+          <animate attributeName="r" values="5;16" dur="1.3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.9;0" dur="1.3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="1046" cy="55" r="5">
+          <animate attributeName="r" values="5;16" dur="1.3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.9;0" dur="1.3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+
+    <rect x="0" y="0" width="90" height="160" fill="url(#c-fade-left)"/>
+    <rect x="670" y="0" width="90" height="160" fill="url(#c-fade-right)"/>
+  </g>
+
+  <text class="lbl" x="24" y="26">NETWORK FLOWS</text>
+  <text class="lbl" x="620" y="59" fill="#e05a45">THRESHOLD</text>
+</svg>

@@ -27,10 +27,10 @@ export function AppSidebar() {
 	return (
 		<Sidebar collapsible="icon" variant="inset">
 			<SidebarHeader className="h-14 justify-center">
-				<SidebarMenuButton asChild tooltip="Flow Sentry">
+				<SidebarMenuButton asChild tooltip="AI-Powered IDS">
 					<Link href="/">
 						<LogoIcon />
-						<span className="font-medium">Flow Sentry</span>
+						<span className="font-medium">AI-Powered IDS</span>
 					</Link>
 				</SidebarMenuButton>
 			</SidebarHeader>
