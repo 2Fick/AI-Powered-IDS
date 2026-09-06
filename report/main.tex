@@ -22,6 +22,7 @@
 ]{geometry}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{float}
 \usepackage{caption}
 \usepackage{titlesec}
 \usepackage[protrusion=true,expansion=false]{microtype}
@@ -154,23 +155,6 @@ far worse: DoS Hulk has \num{231073} flows and Heartbleed has 11, a ratio above
 twenty thousand to one. Recall per family, not one aggregate number, is the only
 honest summary.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/class-balance.pdf}
-  \caption{Flows per class on a logarithmic axis. Benign in blue, attacks in
-  red. On a linear axis every family below the top three is invisible.}
-  \label{fig:balance}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/session-mix.pdf}
-  \caption{Benign and attack traffic per capture session. Monday is benign
-  only and the attack share elsewhere swings from \SI{0.01}{\percent} to
-  \SI{57}{\percent}.}
-  \label{fig:sessions}
-\end{figure}
-
 \subsection{Cleaning and splitting}
 
 Cleaning drops the padding rows, the infinities, \num{115} flows with a negative
@@ -208,14 +192,6 @@ $\operatorname{sign}(x)\log(1+|x|)$ followed by standardisation: it compresses
 the same tails, runs in microseconds, and is a plain array expression rather
 than a library call with per invocation validation.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/feature-skew.pdf}
-  \caption{Maximum value divided by the 99th percentile, for the ten heaviest
-  tailed features.}
-  \label{fig:skew}
-\end{figure}
-
 \section{Method}
 
 \subsection{Fitting}
@@ -251,14 +227,6 @@ reduced from 100 trees to 50, which halved the served latency from
 \SI{3.09}{\milli\second} to \SI{1.66}{\milli\second} with no measurable change
 in recall.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/forest-size.pdf}
-  \caption{Random forest recall and per flow latency against the number of
-  trees. The two lines do not agree.}
-  \label{fig:forest}
-\end{figure}
-
 \subsection{How much each isolation tree sees}
 
 Figure~\ref{fig:isolation} shows recall climbing monotonically with the number
@@ -267,14 +235,6 @@ of flows each tree is fitted on, from \SI{0.95}{\percent} at 128 samples to
 the worst end of that curve. Moving to \num{16384} took recall on the full test
 split from \SI{11.3}{\percent} to \SI{17.2}{\percent} at the same false positive
 rate.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/isolation-samples.pdf}
-  \caption{Isolation forest quality against samples per tree. The dotted line
-  marks the library default.}
-  \label{fig:isolation}
-\end{figure}
 
 \subsection{When to stop training the autoencoder}
 
@@ -285,35 +245,10 @@ epoch 7 at $0.932$ and then drifts back to $0.918$, while recall keeps climbing
 until roughly epoch 16 and flattens. Training longer makes the reconstruction
 better without making the detector better.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/learning-curve.pdf}
-  \caption{Autoencoder loss, area under the ROC curve and recall by epoch. The
-  dotted line marks the epoch of best ranking quality.}
-  \label{fig:learning}
-\end{figure}
-
 \section{Results}
 
 Table~\ref{tab:results} reports the three models on \num{691941} held out
 flows, \num{136187} of them attacks.
-
-\begin{table}[t]
-  \centering
-  \small
-  \caption{Held out test split. Both unsupervised models are thresholded at a
-  \SI{1}{\percent} target false positive rate.}
-  \label{tab:results}
-  \begin{tabular}{lrrrr}
-    \toprule
-    Model & Recall & FP rate & AUC & Latency \\
-    \midrule
-    Random Forest    & \SI{99.87}{\percent} & \SI{0.07}{\percent} & 1.000 & \SI{1.66}{\milli\second} \\
-    Isolation Forest & \SI{17.24}{\percent} & \SI{1.01}{\percent} & 0.921 & \SI{3.29}{\milli\second} \\
-    Autoencoder      & \SI{37.69}{\percent} & \SI{1.01}{\percent} & 0.930 & \SI{0.33}{\milli\second} \\
-    \bottomrule
-  \end{tabular}
-\end{table}
 
 Figure~\ref{fig:family} is the more informative view. The supervised model is
 near perfect on every family with more than a thousand examples and drops to
@@ -324,33 +259,10 @@ model detects a port scan at all, because a port scan is a small, ordinary
 looking flow, and asking whether a flow is unusual in general is not the same
 question as asking whether it is unusual for its destination port.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/per-family-recall.pdf}
-  \caption{Recall per attack family, with the number of test flows in
-  parentheses. Families are ordered by size.}
-  \label{fig:family}
-\end{figure}
-
 Figure~\ref{fig:roc} shows the whole trade off rather than one point on it, and
 Figure~\ref{fig:separation} shows why the autoencoder cannot do better at any
 threshold: the benign and attack score distributions overlap heavily, and the
 threshold is placed where it is only because the false positive budget says so.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/roc-curves.pdf}
-  \caption{ROC curves with the area under each in parentheses.}
-  \label{fig:roc}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/score-separation.pdf}
-  \caption{Autoencoder reconstruction error for benign and attack flows, each
-  normalised to its own class. The dashed line is the threshold in use.}
-  \label{fig:separation}
-\end{figure}
 
 \section{How much to trust the numbers}
 
@@ -370,22 +282,6 @@ half their recall or more, and that is the useful finding: their thresholds are
 fitted on the benign traffic of the training window, and benign traffic drifts
 within a working day. Anything deployed this way needs its threshold
 recalibrated on a rolling window rather than fixed once at training time.
-
-\begin{table}[t]
-  \centering
-  \small
-  \caption{Recall under a random split and under a time ordered split.}
-  \label{tab:split}
-  \begin{tabular}{lrr}
-    \toprule
-    Model & Random & Time ordered \\
-    \midrule
-    Random Forest    & \SI{99.9}{\percent} & \SI{98.5}{\percent} \\
-    Isolation Forest & \SI{6.9}{\percent}  & \SI{1.8}{\percent} \\
-    Autoencoder      & \SI{43.2}{\percent} & \SI{22.8}{\percent} \\
-    \bottomrule
-  \end{tabular}
-\end{table}
 
 \subsection{Attacks nobody trained on}
 
@@ -408,14 +304,6 @@ The unsupervised models are not a safety net either. They recover
 \SI{33.7}{\percent} on DDoS and \SI{32.2}{\percent} on slowloris, and nothing at
 all on the other four.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/novelty.pdf}
-  \caption{Recall on a family removed from training. The unsupervised models
-  see no attacks during training, so only the supervised one changes.}
-  \label{fig:novelty}
-\end{figure}
-
 \section{Conclusion}
 
 The supervised model is the one to deploy. It is accurate, it survives a
@@ -432,6 +320,129 @@ window, weighting the autoencoder reconstruction error per feature so that an
 anomaly confined to one dimension is not averaged away across 69, and
 conditioning the models on destination port so that ``unusual'' can mean
 ``unusual for this service''.
+
+\clearpage
+\onecolumn
+\appendix
+
+\section{Tables}
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Held out test split. Both unsupervised models are thresholded at a
+  \SI{1}{\percent} target false positive rate.}
+  \label{tab:results}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Model & Recall & FP rate & AUC & Latency \\
+    \midrule
+    Random Forest    & \SI{99.87}{\percent} & \SI{0.07}{\percent} & 1.000 & \SI{1.66}{\milli\second} \\
+    Isolation Forest & \SI{17.24}{\percent} & \SI{1.01}{\percent} & 0.921 & \SI{3.29}{\milli\second} \\
+    Autoencoder      & \SI{37.69}{\percent} & \SI{1.01}{\percent} & 0.930 & \SI{0.33}{\milli\second} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Recall under a random split and under a time ordered split.}
+  \label{tab:split}
+  \begin{tabular}{lrr}
+    \toprule
+    Model & Random & Time ordered \\
+    \midrule
+    Random Forest    & \SI{99.9}{\percent} & \SI{98.5}{\percent} \\
+    Isolation Forest & \SI{6.9}{\percent}  & \SI{1.8}{\percent} \\
+    Autoencoder      & \SI{43.2}{\percent} & \SI{22.8}{\percent} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\section{Figures}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/class-balance.pdf}
+  \caption{Flows per class on a logarithmic axis. Benign in blue, attacks in
+  red. On a linear axis every family below the top three is invisible.}
+  \label{fig:balance}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/session-mix.pdf}
+  \caption{Benign and attack traffic per capture session. Monday is benign
+  only and the attack share elsewhere swings from \SI{0.01}{\percent} to
+  \SI{57}{\percent}.}
+  \label{fig:sessions}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/feature-skew.pdf}
+  \caption{Maximum value divided by the 99th percentile, for the ten heaviest
+  tailed features.}
+  \label{fig:skew}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/forest-size.pdf}
+  \caption{Random forest recall and per flow latency against the number of
+  trees. The two lines do not agree.}
+  \label{fig:forest}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/isolation-samples.pdf}
+  \caption{Isolation forest quality against samples per tree. The dotted line
+  marks the library default.}
+  \label{fig:isolation}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/learning-curve.pdf}
+  \caption{Autoencoder loss, area under the ROC curve and recall by epoch. The
+  dotted line marks the epoch of best ranking quality.}
+  \label{fig:learning}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/per-family-recall.pdf}
+  \caption{Recall per attack family, with the number of test flows in
+  parentheses. Families are ordered by size.}
+  \label{fig:family}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/roc-curves.pdf}
+  \caption{ROC curves with the area under each in parentheses.}
+  \label{fig:roc}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/score-separation.pdf}
+  \caption{Autoencoder reconstruction error for benign and attack flows, each
+  normalised to its own class. The dashed line is the threshold in use.}
+  \label{fig:separation}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\linewidth]{figures/novelty.pdf}
+  \caption{Recall on a family removed from training. The unsupervised models
+  see no attacks during training, so only the supervised one changes.}
+  \label{fig:novelty}
+\end{figure}
+
 
 \section*{Reproducing this report}
 
