@@ -562,7 +562,12 @@ export function FeatureDistributionChart({
 								</SelectContent>
 							</Select>
 						</div>
-						<ChartContainer className="h-56 w-full" config={config}>
+						{/* Grows into whatever height the card is given, with a
+						    floor so it stays readable in a short one. */}
+						<ChartContainer
+							className="h-full min-h-56 w-full flex-1"
+							config={config}
+						>
 							<AreaChart accessibilityLayer data={rows}>
 								<CartesianGrid vertical={false} />
 								<XAxis

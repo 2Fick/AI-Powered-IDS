@@ -36,12 +36,12 @@ export function ReportCard<T>({
 	children: (data: T) => React.ReactNode;
 }) {
 	return (
-		<Card className={cn("shadow-none dark:ring-0", className)} id={id}>
+		<Card className={cn("flex flex-col shadow-none dark:ring-0", className)} id={id}>
 			<CardHeader>
 				<CardTitle>{title}</CardTitle>
 				<CardDescription>{description}</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="flex flex-1 flex-col">
 				{report.loading ? <Skeleton className="h-56 w-full" /> : null}
 				{report.error ? (
 					<p className="text-muted-foreground text-sm">
