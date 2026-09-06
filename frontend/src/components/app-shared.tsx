@@ -84,6 +84,7 @@ export const pages: PageLink[] = [
 			{ title: "Class balance", section: "balance" },
 			{ title: "Capture sessions", section: "sessions" },
 			{ title: "Feature skew", section: "skew" },
+			{ title: "Feature distributions", section: "features" },
 		],
 	},
 	{
@@ -93,8 +94,9 @@ export const pages: PageLink[] = [
 		icon: <TableIcon />,
 		sections: [
 			{ title: "Comparison", section: "comparison", icon: <GaugeIcon /> },
-			{ title: "Attack coverage", section: "coverage", icon: <TableIcon /> },
 			{ title: "Inference latency", section: "latency", icon: <TimerIcon /> },
+			{ title: "Attack coverage", section: "coverage", icon: <TableIcon /> },
+			{ title: "What the models look at", section: "importance" },
 		],
 	},
 	{
@@ -120,8 +122,6 @@ export const pages: PageLink[] = [
 			{ title: "ROC curves", section: "roc" },
 			{ title: "Threshold trade off", section: "threshold" },
 			{ title: "Score separation", section: "separation" },
-			{ title: "Feature importance", section: "importance" },
-			{ title: "Feature distributions", section: "features" },
 		],
 	},
 ];
