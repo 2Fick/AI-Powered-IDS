@@ -23,9 +23,12 @@ the supervised one, and what it costs to decide.
 | Isolation Forest | Unsupervised, isolates points that sit apart, scikit-learn |
 | Autoencoder | Unsupervised, flags flows it cannot rebuild, PyTorch |
 | Benchmark | Recall, false positive rate and latency on a held out split |
+| Sweeps | Hyperparameter curves, so the chosen values are read off a chart |
+| Curves | ROC, precision recall, threshold trade off, feature distributions |
 | Validation | Measures how much the split flatters the models |
+| Novelty | What happens on an attack family nobody trained on |
 | API | FastAPI, REST plus a WebSocket that replays traffic |
-| Dashboard | Next.js and shadcn, live alerts and the comparison tables |
+| Dashboard | Next.js and shadcn, five pages, one question each |
 | Threat intel | VirusTotal, AbuseIPDB, Shodan and GreyNoise |
 
 Everything used here is free. Two of the four intelligence sources need no
@@ -86,9 +89,19 @@ numbers are, and who talks to whom.
 .venv/Scripts/python.exe -m ids.benchmark
 ```
 
-Preprocessing takes about two minutes, training about ten, the benchmark about
-four. Training writes to `models/`, the benchmark to
+Preprocessing takes about two minutes, training about seven, the benchmark
+about four. Training writes to `models/`, the benchmark to
 [reports/benchmark.md](reports/benchmark.md).
+
+The four experiments behind the Tuning and Evidence pages are optional and can
+run in any order. Everything else works without them.
+
+```bash
+.venv/Scripts/python.exe -m ids.sweep
+.venv/Scripts/python.exe -m ids.curves
+.venv/Scripts/python.exe -m ids.validate
+.venv/Scripts/python.exe -m ids.novelty
+```
 
 ### 4. Run it
 
@@ -117,39 +130,63 @@ first. They are build output, not source.
 
 ## What the dashboard shows
 
-The page is one screen split into sections, and the sidebar scrolls between
-them.
+Five pages, each answering one question, so a reader is never asked to hold the
+whole system in their head at once.
 
-**Overview** counts flows replayed, alerts raised, attacks missed and the false
-positive rate, all for the random forest, which is the model that would actually
-be deployed.
+**Overview** is what the sensor is doing right now: flows replayed, alerts
+raised, attacks missed and the false positive rate, all for the random forest
+because that is the model that would actually be deployed. The replay control
+sets the speed from 4 to 80 flows per second. Every flow it sends was held out
+before training, so nothing on screen was ever seen by a model.
 
-**Replay control** starts, stops and restarts the stream and sets its speed from
-4 to 80 flows per second. Every flow it sends was held out before training, so
-nothing on screen was ever seen by a model.
+**Live traffic** is who is being flagged. One row per flow that at least one
+model flagged, with the ground truth beside it, so a real catch and a false
+positive are visible at a glance and the verdict column shows which models
+agreed. The threat intelligence panel says what the outside world knows about
+the public addresses behind those alerts. The running scoreboard recomputes
+recall and false positive rate from the flows that have gone past on this
+connection, and watching it converge on the benchmark is the check that the
+served models are the ones that were measured.
 
-**Attack mix** is what the replay has produced so far, by family.
+**Models** is the comparison table, recall per attack family, and inference
+latency measured live rather than quoted.
 
-**Threat intelligence** shows what the outside world knows about the public
-addresses behind alerts. Most of the capture runs on a private test bed, so this
-fills slowly, and that is the honest behaviour: asking VirusTotal about
-192.168.10.9 wastes a request and answers nothing.
+**Tuning** is how each model was sized. Four charts, one per decision, read off
+the sweep rather than asserted.
 
-**Alerts per second** and **Inference latency** are the two live charts. The
-first shows how loud each model is on identical traffic. The second is the
-number that decides whether a model can be deployed at all, measured rather than
-quoted.
+**Evidence** is why the numbers should be believed. ROC curves, the threshold
+trade off with the operating point in use marked, where benign and attack
+scores actually sit, what the forest looks at and how those measurements are
+distributed, plus the split validation and the unseen attack results.
 
-**Live alerts** is the feed. One row per flow that at least one model flagged,
-with the ground truth beside it, so a real catch and a false positive are
-visible at a glance and the verdict column shows which models agreed.
+## Tuning, what the sweeps say
 
-**Running scoreboard** recomputes recall, false positive rate and precision from
-the flows that have gone past on this connection. Watching it converge on the
-benchmark is the check that the served models are the ones that were measured.
+```bash
+.venv/Scripts/python.exe -m ids.sweep
+```
 
-**Model comparison** and **Coverage by attack family** are the offline results,
-read from the benchmark report.
+Three findings, and two of them changed the configuration.
+
+**The random forest does not need 100 trees.** Recall sits between 99.76 and
+99.78 percent from five trees all the way to two hundred, while the time to
+score one flow goes from 0.33 ms to 6.70 ms. Every tree after the first handful
+buys nothing and costs latency, so the forest is sized for the latency budget.
+Dropping to 50 halved the served latency, from 3.09 ms to 1.66 ms per flow,
+with no measurable change in recall.
+
+**The isolation forest was crippled by a library default.** Recall climbs
+monotonically with the number of flows each tree is fitted on: 0.95 percent at
+128 samples, 2.5 percent at 4096, 17.0 percent at 16384. The scikit-learn
+default is 256, which sits near the worst end of that curve. Moving to 16384
+took recall from 11.3 to 17.2 percent at the same false positive rate.
+
+**The autoencoder loss and its detection quality disagree.** Over 25 epochs the
+training loss falls steadily from 0.540 to 0.036, but the ranking quality peaks
+at epoch 7 with an area of 0.932 and then drifts back down to 0.918, while
+recall keeps climbing until about epoch 16 and then flattens. Training longer
+makes the reconstruction better without making the detector better, which is
+the reason both are measured every epoch rather than just the loss.
+
 
 ## Results
 
@@ -159,27 +196,31 @@ false positive rate, so the comparison is fair.
 
 | Model | Type | Recall | False positives | Precision | ROC AUC | Latency per flow |
 | --- | --- | --- | --- | --- | --- | --- |
-| Random Forest | supervised | 99.87% | 0.07% | 99.70% | 1.000 | 3.09 ms |
-| Isolation Forest | unsupervised | 11.32% | 1.00% | 73.40% | 0.901 | 3.43 ms |
-| Autoencoder | deep learning | 37.69% | 1.01% | 90.15% | 0.930 | 0.34 ms |
+| Random Forest | supervised | 99.87% | 0.07% | 99.70% | 1.000 | 1.66 ms |
+| Isolation Forest | unsupervised | 17.24% | 1.01% | 80.66% | 0.921 | 3.29 ms |
+| Autoencoder | deep learning | 37.69% | 1.01% | 90.15% | 0.930 | 0.33 ms |
+
+Both the forest size and the isolation forest sample size come off the sweep
+curves rather than from a round number.
 
 The headline is not the interesting part. This is:
 
 | Attack family | Flows | Random Forest | Isolation Forest | Autoencoder |
 | --- | --- | --- | --- | --- |
-| DoS Hulk | 56,320 | 100% | 15% | 61% |
+| DoS Hulk | 56,320 | 100% | 28% | 61% |
 | PortScan | 38,855 | 100% | 0% | 1% |
-| DoS Slowhttptest | 1,345 | 100% | 75% | 90% |
-| Bot | 479 | 79% | 2% | 0% |
+| DoS Slowhttptest | 1,345 | 100% | 89% | 90% |
+| Bot | 479 | 81% | 3% | 0% |
 | Infiltration | 9 | 67% | 67% | 89% |
 | Heartbleed | 3 | 100% | 100% | 100% |
 
 The supervised model wins almost everywhere, and it is weakest on Bot and
 Infiltration, the two families with the fewest labelled examples. Those are
 exactly the families where the unsupervised models still have something to say.
-The autoencoder beats the random forest on Infiltration. Neither unsupervised
-model sees a port scan at all, because a port scan looks like a very small,
-very ordinary flow.
+The autoencoder beats the random forest on Infiltration, 89 percent against 67.
+Neither unsupervised model sees a port scan at all, because a port scan is a
+very small, very ordinary looking flow and neither of them is asking whether a
+flow is ordinary for its port.
 
 That is the argument for keeping all three rather than shipping the one with
 the best headline number.
@@ -246,7 +287,10 @@ In this order:
 6. [src/ids/train.py](src/ids/train.py) the three models and their thresholds
 7. [src/ids/detectors.py](src/ids/detectors.py) the shared serving interface
 8. [src/ids/benchmark.py](src/ids/benchmark.py) the metrics that matter here
-9. [src/ids/validate.py](src/ids/validate.py) how much the split flatters everything
+9. [src/ids/sweep.py](src/ids/sweep.py) where the chosen hyperparameters come from
+10. [src/ids/curves.py](src/ids/curves.py) ROC, thresholds, feature distributions
+11. [src/ids/validate.py](src/ids/validate.py) how much the split flatters everything
+12. [src/ids/novelty.py](src/ids/novelty.py) what happens on an unseen attack family
 
 Then the API in [src/ids/api/](src/ids/api/) and the dashboard in
 [frontend/src/](frontend/src/).
