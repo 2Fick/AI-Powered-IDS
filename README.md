@@ -1,45 +1,132 @@
-# Network intrusion detection on CICIDS2017
+<div align="center">
 
-Three detectors look at the same network traffic and disagree about it, live.
+<img src="docs/mascot.svg" alt="Flow Sentry" width="150">
 
-A random forest, an isolation forest and an autoencoder are trained on the
-CICIDS2017 capture, then served behind one API that scores flows one at a time.
-A dashboard replays held out traffic through all three at once and shows what
-each of them catches, what each of them misses, and how long each of them takes
-to decide.
+# Flow Sentry
 
-The point of the project is the comparison, not any single model. A supervised
-classifier reaches 99.9 percent recall on this dataset and that number is
-almost meaningless on its own, so the interesting work is in the parts that
-explain it: what the split does to the score, where the unsupervised models beat
-the supervised one, and what it costs to decide.
+**Three intrusion detectors watch the same network traffic and disagree about it.
+This project measures exactly how.**
 
-## What is in the box
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.5%20CPU-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![Docker](https://img.shields.io/badge/Docker-compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
 
-| Piece | What it does |
-| --- | --- |
-| Data pipeline | Downloads the eight capture files, cleans them, splits them |
-| Random Forest | Supervised, learns from labelled attacks, scikit-learn |
-| Isolation Forest | Unsupervised, isolates points that sit apart, scikit-learn |
-| Autoencoder | Unsupervised, flags flows it cannot rebuild, PyTorch |
-| Benchmark | Recall, false positive rate and latency on a held out split |
-| Sweeps | Hyperparameter curves, so the chosen values are read off a chart |
-| Curves | ROC, precision recall, threshold trade off, feature distributions |
-| Validation | Measures how much the split flatters the models |
-| Novelty | What happens on an attack family nobody trained on |
-| API | FastAPI, REST plus a WebSocket that replays traffic |
-| Dashboard | Next.js and shadcn, five pages, one question each |
-| Threat intel | VirusTotal, AbuseIPDB, Shodan and GreyNoise |
-| Written report | Five pages in LaTeX, figures drawn from the same JSON |
+[![Dataset](https://img.shields.io/badge/dataset-CICIDS2017-1f4e9c)](https://www.unb.ca/cic/datasets/ids-2017.html)
+[![Flows](https://img.shields.io/badge/flows-2.8M-1f4e9c)](#results)
+[![Recall](https://img.shields.io/badge/recall-99.87%25-0f8a6a)](#results)
+[![False positives](https://img.shields.io/badge/false%20positives-0.07%25-0f8a6a)](#results)
+[![Latency](https://img.shields.io/badge/latency-1.66%20ms%2Fflow-0f8a6a)](#results)
+[![Tests](https://img.shields.io/badge/tests-16%20passing-0f8a6a)](#tests)
+[![Report](https://img.shields.io/badge/report-7%20page%20PDF-c1442e)](report/)
 
-Everything used here is free. Two of the four intelligence sources need no
-account at all.
+</div>
+
+---
+
+## What this is
+
+A random forest, an isolation forest and a PyTorch autoencoder are trained on
+five days of real network traffic, then served behind one API that scores flows
+one at a time. A dashboard replays held out traffic through all three at once and
+shows what each catches, what each misses, and how long each takes to decide.
+
+The supervised model reaches 99.87 percent recall. That number is easy to get on
+this dataset and easy to overstate, so most of the work here is in the parts that
+qualify it.
+
+**Three findings, each measured rather than assumed.**
+
+> A random train and test split leaves **27.8 percent of the test attacks with a
+> byte identical twin in the training half**, because a denial of service burst
+> produces thousands of identical flows.
+
+> The forest reaches its recall at **five trees** and every tree after that only
+> costs latency. The scikit-learn default for the isolation forest sits near the
+> **worst end of its own curve**.
+
+> Remove one attack family from training and the supervised model does not
+> degrade, it **collapses to zero on three families out of six**. The
+> unsupervised models recover a third of the loss on two and nothing on the rest.
+
+## How a flow travels through it
+
+<div align="center">
+<img src="docs/architecture.svg" alt="A flow goes from the capture files through cleaning, then through the three detectors in parallel, then out to the API and the dashboard" width="100%">
+</div>
+
+## What it looks like
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/live-alerts.png" alt="Live alert feed"></td>
+<td width="50%"><img src="docs/screenshots/models.png" alt="Model comparison"></td>
+</tr>
+<tr>
+<td><b>Live traffic.</b> One row per flow a model flagged, the ground truth beside
+it, and what the outside world knows about the public addresses.</td>
+<td><b>Models.</b> The comparison table, recall per attack family, and what the
+forest actually splits on.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/tuning.png" alt="Hyperparameter sweeps"></td>
+<td><img src="docs/screenshots/data.png" alt="Dataset shape"></td>
+</tr>
+<tr>
+<td><b>Tuning.</b> Every hyperparameter read off a curve rather than picked.</td>
+<td><b>Data.</b> What the dataset holds, and what the pipeline does to it.</td>
+</tr>
+</table>
+
+## Results
+
+On 691,941 held out flows, 136,187 of them attacks. Both unsupervised models are
+thresholded on the benign score distribution at a 1 percent target false positive
+rate, so the comparison is fair.
+
+| Model | Type | Recall | False positives | Latency per flow |
+| --- | --- | --- | --- | --- |
+| Random Forest | supervised | **99.87%** | **0.07%** | 1.66 ms |
+| Isolation Forest | unsupervised | 17.24% | 1.01% | 3.29 ms |
+| Autoencoder | deep learning | 37.69% | 1.01% | **0.33 ms** |
+
+The headline is not the interesting part. This is:
+
+| Attack family | Test flows | Random Forest | Isolation Forest | Autoencoder |
+| --- | --- | --- | --- | --- |
+| DoS Hulk | 56,320 | 100% | 28% | 61% |
+| PortScan | 38,855 | 100% | 0% | 1% |
+| DoS Slowhttptest | 1,345 | 100% | 89% | 90% |
+| Bot | 479 | 81% | 3% | 0% |
+| Infiltration | 9 | 67% | 67% | **89%** |
+| Heartbleed | 3 | 100% | 100% | 100% |
+
+The supervised model wins almost everywhere and is weakest on the two rarest
+families. Those are the only two places an unsupervised model competes, and on
+Infiltration the autoencoder beats it outright. Neither unsupervised model sees a
+port scan at all, because a port scan is a small, perfectly ordinary looking flow.
+
+That is the argument for keeping three models rather than shipping the one with
+the best number.
+
+## The written report
+
+Seven pages in [`report/`](report/): the method and the measurements in the body,
+every figure in the appendix.
+
+```bash
+python -m ids.report.figures
+cd report && pdflatex -output-directory=build main.tex
+```
+
+Every figure is drawn by a command from the same JSON the dashboard reads, so the
+paper and the browser cannot tell different stories.
 
 ## Running it
 
-Python 3.11 or newer, Node 20 or newer. Nothing else has to be installed.
-
-### 1. Set up
+Python 3.11 or newer, Node 20 or newer.
 
 ```bash
 python -m venv .venv
@@ -48,65 +135,20 @@ python -m venv .venv
 .venv/Scripts/python.exe -m pip install -e . --no-deps
 ```
 
-The second line is deliberate. The default PyTorch wheel bundles CUDA and
-weighs several gigabytes, which this project has no use for: the autoencoder is
-a small dense network over 69 tabular features and scores a flow in well under
-a millisecond on a CPU.
-
-On Linux or macOS, `.venv/bin/python` replaces `.venv/Scripts/python.exe`
-throughout.
-
-### 2. Get the data and look at it
+The CPU wheel index is deliberate: the default PyTorch wheel bundles CUDA and
+weighs several gigabytes, which a small dense network over 69 tabular features
+has no use for. On Linux or macOS, `.venv/bin/python` replaces
+`.venv/Scripts/python.exe` throughout.
 
 ```bash
-.venv/Scripts/python.exe -m ids.data.download
+.venv/Scripts/python.exe -m ids.data.download               # 300 MB into data/raw
+.venv/Scripts/python.exe -m ids.data.explore --out reports  # read this first
+.venv/Scripts/python.exe -m ids.data.preprocess             # about 2 minutes
+.venv/Scripts/python.exe -m ids.train                       # about 7 minutes
+.venv/Scripts/python.exe -m ids.benchmark                   # about 4 minutes
 ```
 
-Roughly 300 MB, into `data/raw`. The dataset home page at the University of New
-Brunswick is behind a registration form that cannot be scripted, so the files
-come from a public mirror instead.
-
-```bash
-.venv/Scripts/python.exe -m ids.data.explore --out reports
-```
-
-Read this before the modelling code. It writes
-[reports/dataset-overview.txt](reports/dataset-overview.txt) and answers the
-questions that shaped everything downstream: how the attacks are spread across
-the week, which columns are dead, which values are broken, how skewed the
-numbers are, and who talks to whom.
-
-### 3. Clean, train, measure
-
-```bash
-.venv/Scripts/python.exe -m ids.data.preprocess
-```
-
-```bash
-.venv/Scripts/python.exe -m ids.train
-```
-
-```bash
-.venv/Scripts/python.exe -m ids.benchmark
-```
-
-Preprocessing takes about two minutes, training about seven, the benchmark
-about four. Training writes to `models/`, the benchmark to
-[reports/benchmark.md](reports/benchmark.md).
-
-The four experiments behind the Tuning and Evidence pages are optional and can
-run in any order. Everything else works without them.
-
-```bash
-.venv/Scripts/python.exe -m ids.sweep
-.venv/Scripts/python.exe -m ids.curves
-.venv/Scripts/python.exe -m ids.validate
-.venv/Scripts/python.exe -m ids.novelty
-```
-
-### 4. Run it
-
-Two terminals.
+Then two terminals:
 
 ```bash
 .venv/Scripts/python.exe -m uvicorn ids.api.main:app --port 8000
@@ -116,285 +158,86 @@ Two terminals.
 cd frontend && npm install && npm run dev
 ```
 
-The dashboard is at <http://localhost:3000>. The API documents itself at
-<http://localhost:8000/docs>.
+Dashboard on <http://localhost:3000>, API documenting itself on
+<http://localhost:8000/docs>. Or `docker compose up --build` for the same two
+addresses.
 
-### With Docker instead
-
-```bash
-docker compose up --build
-```
-
-Same two addresses. The trained models and the replay split are mounted from
-the host rather than baked into the image, so steps 2 and 3 still have to run
-first. They are build output, not source.
-
-## What the dashboard shows
-
-Five pages, each answering one question, so a reader is never asked to hold the
-whole system in their head at once.
-
-**Overview** is what the sensor is doing right now: flows replayed, alerts
-raised, attacks missed and the false positive rate, all for the random forest
-because that is the model that would actually be deployed. The replay control
-sets the speed from 4 to 80 flows per second. Every flow it sends was held out
-before training, so nothing on screen was ever seen by a model.
-
-**Live traffic** is who is being flagged. One row per flow that at least one
-model flagged, with the ground truth beside it, so a real catch and a false
-positive are visible at a glance and the verdict column shows which models
-agreed. The threat intelligence panel says what the outside world knows about
-the public addresses behind those alerts. The running scoreboard recomputes
-recall and false positive rate from the flows that have gone past on this
-connection, and watching it converge on the benchmark is the check that the
-served models are the ones that were measured.
-
-**Models** is the comparison table, recall per attack family, and inference
-latency measured live rather than quoted.
-
-**Tuning** is how each model was sized. Four charts, one per decision, read off
-the sweep rather than asserted.
-
-**Evidence** is why the numbers should be believed. ROC curves, the threshold
-trade off with the operating point in use marked, where benign and attack
-scores actually sit, what the forest looks at and how those measurements are
-distributed, plus the split validation and the unseen attack results.
-
-## Tuning, what the sweeps say
+Four more experiments feed the Tuning and Evidence pages. Optional, any order:
 
 ```bash
-.venv/Scripts/python.exe -m ids.sweep
+.venv/Scripts/python.exe -m ids.sweep      # hyperparameter curves
+.venv/Scripts/python.exe -m ids.curves     # ROC, thresholds, distributions
+.venv/Scripts/python.exe -m ids.validate   # how much the split flatters things
+.venv/Scripts/python.exe -m ids.novelty    # attacks nobody trained on
 ```
 
-Three findings, and two of them changed the configuration.
+## The dashboard
 
-**The random forest does not need 100 trees.** Recall sits between 99.76 and
-99.78 percent from five trees all the way to two hundred, while the time to
-score one flow goes from 0.33 ms to 6.70 ms. Every tree after the first handful
-buys nothing and costs latency, so the forest is sized for the latency budget.
-Dropping to 50 halved the served latency, from 3.09 ms to 1.66 ms per flow,
-with no measurable change in recall.
+Six pages, each answering one question rather than one long scroll.
 
-**The isolation forest was crippled by a library default.** Recall climbs
-monotonically with the number of flows each tree is fitted on: 0.95 percent at
-128 samples, 2.5 percent at 4096, 17.0 percent at 16384. The scikit-learn
-default is 256, which sits near the worst end of that curve. Moving to 16384
-took recall from 11.3 to 17.2 percent at the same false positive rate.
+| Page | Question |
+| --- | --- |
+| Overview | What is the sensor doing right now |
+| Live traffic | Who is being flagged, and what is known about them |
+| Data | What does the dataset hold, and what does the pipeline do to it |
+| Models | Which detector wins, where, and at what cost |
+| Tuning | How was each model sized, and on what evidence |
+| Evidence | Why should any of these numbers be believed |
 
-**The autoencoder loss and its detection quality disagree.** Over 25 epochs the
-training loss falls steadily from 0.540 to 0.036, but the ranking quality peaks
-at epoch 7 with an area of 0.932 and then drifts back down to 0.918, while
-recall keeps climbing until about epoch 16 and then flattens. Training longer
-makes the reconstruction better without making the detector better, which is
-the reason both are measured every epoch rather than just the loss.
+The replay stream sends flows held out before training, one at a time, at a rate
+you set from 4 to 80 per second. The running scoreboard recomputes recall and
+false positive rate from the flows that have actually gone past, and watching it
+converge on the benchmark is the check that the served models are the ones that
+were measured.
 
-
-## Results
-
-Measured on 691,941 held out flows, 136,187 of them attacks. Both unsupervised
-models are thresholded on the benign score distribution at a 1 percent target
-false positive rate, so the comparison is fair.
-
-| Model | Type | Recall | False positives | Precision | ROC AUC | Latency per flow |
-| --- | --- | --- | --- | --- | --- | --- |
-| Random Forest | supervised | 99.87% | 0.07% | 99.70% | 1.000 | 1.66 ms |
-| Isolation Forest | unsupervised | 17.24% | 1.01% | 80.66% | 0.921 | 3.29 ms |
-| Autoencoder | deep learning | 37.69% | 1.01% | 90.15% | 0.930 | 0.33 ms |
-
-Both the forest size and the isolation forest sample size come off the sweep
-curves rather than from a round number.
-
-The headline is not the interesting part. This is:
-
-| Attack family | Flows | Random Forest | Isolation Forest | Autoencoder |
-| --- | --- | --- | --- | --- |
-| DoS Hulk | 56,320 | 100% | 28% | 61% |
-| PortScan | 38,855 | 100% | 0% | 1% |
-| DoS Slowhttptest | 1,345 | 100% | 89% | 90% |
-| Bot | 479 | 81% | 3% | 0% |
-| Infiltration | 9 | 67% | 67% | 89% |
-| Heartbleed | 3 | 100% | 100% | 100% |
-
-The supervised model wins almost everywhere, and it is weakest on Bot and
-Infiltration, the two families with the fewest labelled examples. Those are
-exactly the families where the unsupervised models still have something to say.
-The autoencoder beats the random forest on Infiltration, 89 percent against 67.
-Neither unsupervised model sees a port scan at all, because a port scan is a
-very small, very ordinary looking flow and neither of them is asking whether a
-flow is ordinary for its port.
-
-That is the argument for keeping all three rather than shipping the one with
-the best headline number.
-
-## What happens on an attack nobody trained on
-
-```bash
-.venv/Scripts/python.exe -m ids.novelty
-```
-
-The random forest works under a closed world assumption. It can only recognise
-the families it was shown, and real traffic does not agree to stay inside a
-training set. So one family at a time is removed from training, all three
-models are refitted on what is left, and each is asked about the family none of
-them was told about.
-
-| Held out family | Flows | Random Forest | Isolation Forest | Autoencoder |
-| --- | --- | --- | --- | --- |
-| PortScan | 11,231 | 0.0% | 0.1% | 0.2% |
-| DDoS | 9,053 | 63.9% | 1.9% | 33.7% |
-| Bot | 138 | 0.0% | 2.2% | 0.0% |
-| FTP-Patator | 561 | 0.0% | 0.0% | 0.0% |
-| DoS slowloris | 410 | 89.8% | 32.2% | 28.0% |
-| Web Attack Brute Force | 107 | 80.4% | 0.0% | 0.0% |
-
-This did not come out the way the pitch for an ensemble usually goes, and the
-result is more useful than that pitch would have been.
-
-**The supervised model does not fail gracefully, it fails unpredictably.** On
-three of the six families it drops from near perfect to zero. On the other
-three it holds up, and the pattern behind that is not subtle: it generalises
-when something structurally similar is still in the training data. DDoS
-survives because DoS Hulk is still there. Slowloris survives because the other
-slow denial of service families are. Web brute force survives because cross
-site scripting and SQL injection are. PortScan, Bot and FTP-Patator have no
-close relative left, and the model goes to zero on all three.
-
-**The unsupervised models are not a safety net either.** They add something
-real on two families, 33.7 percent on DDoS and 32.2 percent on slowloris, and
-nothing at all on the other four. A port scan or a single bot callback is a
-small, ordinary looking flow, and asking whether a flow is unusual in general
-is not the same question as asking whether it is unusual for its port.
-
-So the honest conclusion is not that three models cover each other. It is that
-none of these approaches handles a genuinely new attack on its own, and a
-system built on them needs a retraining pipeline and human review rather than a
-detector that is assumed to catch the unknown. Where the ensemble does earn its
-place is narrower and measurable: on the rare families in the main benchmark,
-where the autoencoder reaches 89 percent on Infiltration against the forest's
-67, and on the two families above where it recovers a third of what the
-supervised model lost.
-
-## How much does the split flatter these numbers
-
-A random train and test split on CICIDS2017 is generous, and it is worth
-knowing by how much before quoting anything above.
-
-A denial of service burst produces thousands of flows that are identical in
-every feature, so a random split puts copies of the same row on both sides.
-Measured: 2,497,153 distinct feature vectors for 2,827,761 flows, 14.1 percent
-of a random test split has an identical twin in the train half, and 27.8
-percent of the test attacks do.
-
-The second issue is time. A random split lets a model see the first half of an
-attack burst and be graded on the second half. A real sensor is trained on what
-happened before it was deployed and judged on what comes after. Training on the
-earlier part of every capture session and testing on the later part removes
-that.
-
-| Model | Recall random | Recall time ordered | False positives random | False positives time ordered |
-| --- | --- | --- | --- | --- |
-| Random Forest | 99.9% | 98.5% | 0.08% | 0.03% |
-| Isolation Forest | 6.9% | 1.8% | 0.99% | 0.81% |
-| Autoencoder | 43.2% | 22.8% | 1.03% | 0.94% |
-
-The supervised model barely moves, and its false positive rate improves. So the
-duplicates are real but they are not what is producing the headline number: the
-random forest genuinely generalises across the families it was trained on.
-
-The unsupervised models are the ones that lose half their recall or more, and
-that is the honest finding. Their thresholds are fitted on the benign traffic of
-the training window, and benign traffic drifts within a working day, so a
-threshold calibrated on the morning is already slightly wrong by the afternoon.
-Anything deployed this way needs its threshold recalibrated on a rolling window
-rather than fixed once at training time.
-
-Reproduce with:
-
-```bash
-.venv/Scripts/python.exe -m ids.validate
-```
-
-The random split numbers there differ a little from the benchmark table above
-because the script re-splits the whole dataset from scratch, replay rows
-included, and refits everything. The gap between the two is a fair picture of
-how much these figures move with the split alone.
-
-What neither split measures is a genuinely new attack. The random forest works
-under a closed world assumption: it can only recognise the fourteen families it
-was shown. That limitation is the reason the two unsupervised models are in the
-project at all.
+Alerts on public addresses are enriched by four services. Shodan and GreyNoise
+answer without an API key, so enrichment works on a fresh clone. VirusTotal and
+AbuseIPDB add reputation when a free key is set in `.env`.
 
 ## Reading the code
 
 In this order:
 
-1. [src/ids/data/explore.py](src/ids/data/explore.py) what the dataset looks like
-2. [src/ids/config.py](src/ids/config.py) paths, sessions, which columns are features
-3. [src/ids/data/preprocess.py](src/ids/data/preprocess.py) cleaning and splitting
-4. [src/ids/models/scaling.py](src/ids/models/scaling.py) why a signed logarithm
-5. [src/ids/models/autoencoder.py](src/ids/models/autoencoder.py) the network
-6. [src/ids/train.py](src/ids/train.py) the three models and their thresholds
-7. [src/ids/detectors.py](src/ids/detectors.py) the shared serving interface
-8. [src/ids/benchmark.py](src/ids/benchmark.py) the metrics that matter here
-9. [src/ids/sweep.py](src/ids/sweep.py) where the chosen hyperparameters come from
-10. [src/ids/curves.py](src/ids/curves.py) ROC, thresholds, feature distributions
-11. [src/ids/validate.py](src/ids/validate.py) how much the split flatters everything
-12. [src/ids/novelty.py](src/ids/novelty.py) what happens on an unseen attack family
+| # | File | What you learn |
+| --- | --- | --- |
+| 1 | [`data/explore.py`](src/ids/data/explore.py) | What the dataset looks like and why it needs cleaning |
+| 2 | [`config.py`](src/ids/config.py) | Paths, sessions, which columns are features and which are not |
+| 3 | [`data/preprocess.py`](src/ids/data/preprocess.py) | Cleaning, timestamp parsing, and the three splits |
+| 4 | [`models/scaling.py`](src/ids/models/scaling.py) | Why a signed logarithm and not standardisation |
+| 5 | [`models/autoencoder.py`](src/ids/models/autoencoder.py) | The network, and reconstruction error as a score |
+| 6 | [`train.py`](src/ids/train.py) | The three models, and how their thresholds are calibrated |
+| 7 | [`detectors.py`](src/ids/detectors.py) | The shared interface that keeps serving and measuring identical |
+| 8 | [`benchmark.py`](src/ids/benchmark.py) | Which metrics mean anything here, and which do not |
 
-Then the API in [src/ids/api/](src/ids/api/) and the dashboard in
-[frontend/src/](frontend/src/).
+Then [`sweep.py`](src/ids/sweep.py), [`curves.py`](src/ids/curves.py),
+[`validate.py`](src/ids/validate.py) and [`novelty.py`](src/ids/novelty.py) for
+the experiments, [`api/`](src/ids/api/) for the service, and
+[`frontend/src/`](frontend/src/) for the dashboard.
 
 ## Decisions worth explaining
 
-**Why the labelled flow release.** CICIDS2017 ships in two forms. The widely
-used machine learning CSVs keep the 78 flow features and drop the addresses. The
-labelled flow release keeps the same features and adds source and destination
-IP, ports, protocol and timestamp. Without addresses the threat intelligence
-lookups would have nothing real to look up. The feature set handed to the models
-is the standard one either way.
+**The labelled flow release, not the machine learning CSVs.** Both carry the same
+78 features. Only the first keeps the addresses and timestamps, without which the
+threat intelligence has nothing real to look up and the replay has no capture
+order to follow.
 
-**Why accuracy is never quoted.** Four flows in five are benign. A model that
-never raises an alert scores above 80 percent. Recall and false positive rate
-are the only numbers that mean anything here.
+**Accuracy is never quoted.** Four flows in five are benign, so a model that
+never raises an alert already scores above 80 percent.
 
-**Why a signed logarithm rather than a quantile transform.** The features are
-extremely heavy tailed: the largest value of some columns sits nine thousand
-times above the 99th percentile. A quantile transform handles that well and cost
-20 ms to transform a single row, which was more than all three models spent
-deciding put together. A signed logarithm compresses the same tails in
+**A signed logarithm rather than a quantile transform.** The largest value of
+some features sits nine thousand times above their own 99th percentile. A
+quantile transform handles that, and cost 20 ms per row, more than all three
+models spent deciding. `sign(x) log(1+|x|)` compresses the same tails in
 microseconds.
 
-**Why the tree models drop to one worker when serving.** Training spreads over
-every core. Serving scores one flow at a time, and handing a single row to a
-thread pool costs more than the work itself. Dropping to one worker took the
-random forest from about 17 ms per flow to about 3 ms.
+**One worker when serving.** Training spreads over every core. Scoring a single
+row, handing the work to a thread pool costs more than the work itself. This
+alone took the forest from 17 ms to 3 ms per flow.
 
-**Why the replay is shuffled.** The capture runs Monday to Friday and Monday is
-benign only, so a strictly chronological replay spends its first quarter with
-nothing to detect. Shuffling gives every second of the stream the attack density
-of the capture as a whole. Chronological order is still available with
-`--replay-order chronological`.
-
-**Why the unsupervised models share one threshold rule.** Both are fitted on
-benign traffic only, and both take their threshold from the benign score
-distribution at the same target false positive rate. Without that they would be
-compared at whatever operating point each library happened to default to.
-
-## The written report
-
-A five page comparison in [report/main.tex](report/main.tex), covering the
-dataset and the preprocessing decisions, the three models, the hyperparameter
-study, the results and the two validation experiments. Every figure is drawn by
-a command from the same JSON the dashboard reads, so the paper and the browser
-cannot tell different stories.
-
-```bash
-.venv/Scripts/python.exe -m ids.report.figures
-cd report && pdflatex -output-directory=build main.tex
-```
-
-Run pdflatex twice so the figure references resolve. Needs a LaTeX distribution
-and `matplotlib`, which is in `requirements-dev.txt`.
+**One threshold rule for both unsupervised models.** Each takes its threshold
+from its own benign score distribution at the same target false positive rate.
+Without it they would be compared at whatever operating point their library
+happened to default to.
 
 ## Tests
 
@@ -402,22 +245,17 @@ and `matplotlib`, which is in `requirements-dev.txt`.
 .venv/Scripts/python.exe -m pytest
 ```
 
-Covers the scaler, the cleaning step and the threat intelligence client. The
-scaler tests found a real bug: a feature that never varies has a standard
-deviation around 1e-16 rather than zero, so the guard against dividing by zero
-never fired.
-
-## Threat intelligence keys
-
-Optional. Shodan and GreyNoise answer without an account, so enrichment works on
-a fresh clone. Copy `.env.example` to `.env` and fill in the two free keys to
-add the reputation sources:
-
-- <https://www.virustotal.com/gui/my-apikey>
-- <https://www.abuseipdb.com/account/api>
+Sixteen tests over the scaler, the cleaning step and the threat intelligence
+client. The scaler tests found a real bug: a feature that never varies has a
+standard deviation around 1e-16 rather than zero, so the guard against dividing
+by zero never fired.
 
 ## Dataset
 
 Sharafaldin, Lashkari and Ghorbani, *Toward Generating a New Intrusion Detection
 Dataset and Intrusion Traffic Characterization*, ICISSP 2018.
 <https://www.unb.ca/cic/datasets/ids-2017.html>
+
+The University of New Brunswick serves it behind a registration form that cannot
+be scripted, so [`data/download.py`](src/ids/data/download.py) pulls the same
+files from a public mirror.

@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 300" width="980" height="300" role="img" aria-label="A network flow travels from the capture files through cleaning, then through three detectors in parallel, then out to the API and the dashboard">
+  <title>How a flow travels through the system</title>
+
+  <defs>
+    <style>
+      /* Solid boxes on purpose. A media query here follows the operating
+         system rather than the page it is embedded in, so the diagram would
+         come out dark on a light README whenever the two disagree. A fixed
+         palette reads the same on both. */
+      .box   { fill: #16233a; stroke: #33456b; stroke-width: 1.5; }
+      .name  { font: 600 13px system-ui, -apple-system, Segoe UI, sans-serif; fill: #eef3fb; }
+      .sub   { font: 400 10.5px system-ui, -apple-system, Segoe UI, sans-serif; fill: #93a4c2; }
+      .wire  { fill: none; stroke: #7d8aa3; stroke-width: 2; }
+      .stage { font: 600 10px system-ui, -apple-system, Segoe UI, sans-serif; fill: #7d8aa3; letter-spacing: 0.1em; }
+      .pill  { font: 600 11px system-ui, -apple-system, Segoe UI, sans-serif; fill: #ffffff; }
+    </style>
+  </defs>
+
+  <path id="w1" class="wire" d="M172 150 H236"/>
+  <path id="w2" class="wire" d="M372 150 H436"/>
+  <path id="w3" class="wire" d="M372 150 H466 V62 H532"/>
+  <path id="w4" class="wire" d="M372 150 H532"/>
+  <path id="w5" class="wire" d="M372 150 H466 V238 H532"/>
+  <path id="w6" class="wire" d="M668 62 H716 V150 H764"/>
+  <path id="w7" class="wire" d="M668 150 H764"/>
+  <path id="w8" class="wire" d="M668 238 H716 V150 H764"/>
+
+  <text class="stage" x="28" y="34">CAPTURE</text>
+  <text class="stage" x="236" y="34">PREPARE</text>
+  <text class="stage" x="532" y="34">DETECT</text>
+  <text class="stage" x="764" y="34">SERVE</text>
+
+  <rect class="box" x="28" y="118" width="144" height="64" rx="10"/>
+  <text class="name" x="46" y="145">CICIDS2017</text>
+  <text class="sub"  x="46" y="163">3.1M raw flows</text>
+
+  <rect class="box" x="236" y="118" width="136" height="64" rx="10"/>
+  <text class="name" x="254" y="145">Clean and split</text>
+  <text class="sub"  x="254" y="163">2.8M, 69 features</text>
+
+  <rect class="box" x="532" y="34" width="136" height="56" rx="10"/>
+  <circle cx="552" cy="56" r="4" fill="#5b91e8"/>
+  <text class="name" x="566" y="60">Random Forest</text>
+  <text class="sub"  x="566" y="77">supervised, 1.66 ms</text>
+
+  <rect class="box" x="532" y="122" width="136" height="56" rx="10"/>
+  <circle cx="552" cy="144" r="4" fill="#22c58b"/>
+  <text class="name" x="566" y="148">Isolation Forest</text>
+  <text class="sub"  x="566" y="165">benign only, 3.29 ms</text>
+
+  <rect class="box" x="532" y="210" width="136" height="56" rx="10"/>
+  <circle cx="552" cy="232" r="4" fill="#b07ae0"/>
+  <text class="name" x="566" y="236">Autoencoder</text>
+  <text class="sub"  x="566" y="253">benign only, 0.33 ms</text>
+
+  <rect class="box" x="764" y="118" width="188" height="64" rx="10"/>
+  <text class="name" x="782" y="145">FastAPI and WebSocket</text>
+  <text class="sub"  x="782" y="163">one flow at a time, live</text>
+
+  <!-- One flow arrives, is cleaned, fans out to the three detectors, and the
+       three verdicts come back together. -->
+  <circle r="5" fill="#e05a45">
+    <animateMotion dur="1.1s" repeatCount="indefinite">
+      <mpath href="#w1"/>
+    </animateMotion>
+  </circle>
+  <circle r="5" fill="#e05a45" opacity="0.6">
+    <animateMotion dur="1.1s" begin="0.55s" repeatCount="indefinite">
+      <mpath href="#w1"/>
+    </animateMotion>
+  </circle>
+
+  <circle r="5" fill="#5b91e8">
+    <animateMotion dur="1.3s" begin="1.1s" repeatCount="indefinite">
+      <mpath href="#w3"/>
+    </animateMotion>
+  </circle>
+  <circle r="5" fill="#22c58b">
+    <animateMotion dur="1.3s" begin="1.1s" repeatCount="indefinite">
+      <mpath href="#w4"/>
+    </animateMotion>
+  </circle>
+  <circle r="5" fill="#b07ae0">
+    <animateMotion dur="1.3s" begin="1.1s" repeatCount="indefinite">
+      <mpath href="#w5"/>
+    </animateMotion>
+  </circle>
+
+  <circle r="5" fill="#5b91e8">
+    <animateMotion dur="1.3s" begin="2.4s" repeatCount="indefinite">
+      <mpath href="#w6"/>
+    </animateMotion>
+  </circle>
+  <circle r="5" fill="#22c58b">
+    <animateMotion dur="1.3s" begin="2.4s" repeatCount="indefinite">
+      <mpath href="#w7"/>
+    </animateMotion>
+  </circle>
+  <circle r="5" fill="#b07ae0">
+    <animateMotion dur="1.3s" begin="2.4s" repeatCount="indefinite">
+      <mpath href="#w8"/>
+    </animateMotion>
+  </circle>
+
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" dur="3.7s" begin="3.5s" repeatCount="indefinite"/>
+    <rect x="818" y="196" width="118" height="26" rx="13" fill="#e05a45"/>
+    <text class="pill" x="834" y="213">ALERT RAISED</text>
+  </g>
+</svg>
