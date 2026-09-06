@@ -3,6 +3,7 @@ import {
 	ActivityIcon,
 	BookOpenIcon,
 	CodeIcon,
+	DatabaseIcon,
 	FlaskConicalIcon,
 	GaugeIcon,
 	GlobeIcon,
@@ -71,6 +72,18 @@ export const pages: PageLink[] = [
 				section: "scoreboard",
 				icon: <ListChecksIcon />,
 			},
+		],
+	},
+	{
+		title: "Data",
+		blurb: "What the dataset looks like, and what the pipeline does to it",
+		path: "/data",
+		icon: <DatabaseIcon />,
+		sections: [
+			{ title: "Raw files to splits", section: "pipeline" },
+			{ title: "Class balance", section: "balance" },
+			{ title: "Capture sessions", section: "sessions" },
+			{ title: "Feature skew", section: "skew" },
 		],
 	},
 	{
