@@ -26,7 +26,14 @@
 \usepackage{titlesec}
 \usepackage[protrusion=true,expansion=false]{microtype}
 \usepackage{xcolor}
-\usepackage[hidelinks]{hyperref}
+% Coloured rather than hidden, so a figure or table number reads as something
+% that can be clicked and jumps to it.
+\usepackage[
+  colorlinks=true,
+  linkcolor=accent,
+  urlcolor=accent,
+  citecolor=accent
+]{hyperref}
 \usepackage{fancyhdr}
 \usepackage{amsmath}
 \usepackage{siunitx}
@@ -177,11 +184,13 @@ split, so nothing the dashboard streams was ever seen during fitting. The rest
 is split 75 to 25, stratified on the attack family so the rare ones survive on
 both sides. All three splits hold \SI{19.68}{\percent} attacks.
 
-The replay slice is shuffled rather than ordered by capture time. This is a
-deliberate trade: Monday is benign only and accounts for a fifth of the data,
-so a chronological replay spends its first quarter with nothing to detect.
-Shuffling gives every second of the stream the attack density of the capture as
-a whole. Chronological order remains available behind a flag.
+The replay slice is shuffled rather than ordered by capture time, and
+Figure~\ref{fig:sessions} is why. Monday is benign only and accounts for a
+fifth of the data, so a chronological replay spends its first quarter with
+nothing to detect, while Wednesday and both Friday afternoon sessions are more
+than a third attacks. Shuffling gives every second of the stream the attack
+density of the capture as a whole. Chronological order remains available behind
+a flag.
 
 \subsection{Scaling}
 
