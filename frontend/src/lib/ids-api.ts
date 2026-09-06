@@ -172,6 +172,115 @@ export function fetchBenchmark() {
 	return getJson<BenchmarkReport>("/api/benchmark");
 }
 
+export type SweepReport = {
+	setup: {
+		train_rows: number;
+		test_rows: number;
+		features: number;
+		target_fpr: number;
+		note: string;
+	};
+	random_forest_trees: {
+		n_estimators: number;
+		recall: number;
+		false_positive_rate: number;
+		roc_auc: number;
+		fit_seconds: number;
+		latency_ms: number;
+	}[];
+	isolation_forest_samples: {
+		max_samples: number;
+		recall: number;
+		false_positive_rate: number;
+		roc_auc: number;
+		fit_seconds: number;
+	}[];
+	autoencoder_learning_curve: {
+		epoch: number;
+		loss: number;
+		recall: number;
+		roc_auc: number;
+	}[];
+	autoencoder_latent_dim: {
+		latent_dim: number;
+		recall: number;
+		roc_auc: number;
+		fit_seconds: number;
+	}[];
+};
+
+export type CurvePoint = { fpr: number; tpr: number };
+
+export type CurvesReport = {
+	rows: number;
+	attacks: number;
+	models: Record<
+		ModelName,
+		{
+			label: string;
+			kind: string;
+			roc_auc: number;
+			pr_auc: number;
+			roc: CurvePoint[];
+			precision_recall: { recall: number; precision: number }[];
+			threshold_sweep: {
+				chosen_threshold: number;
+				points: {
+					threshold: number;
+					recall: number;
+					false_positive_rate: number;
+					chosen: boolean;
+				}[];
+			};
+			score_histogram: {
+				chosen_threshold: number;
+				bins: { score: number; benign: number; attack: number }[];
+			};
+		}
+	>;
+	feature_distributions: {
+		feature: string;
+		importance: number;
+		benign_median: number;
+		attack_median: number;
+		bins: { value: number; benign: number; attack: number }[];
+	}[];
+	feature_importances: { feature: string; importance: number }[];
+};
+
+export type NoveltyReport = {
+	train_rows: number;
+	test_rows: number;
+	target_fpr: number;
+	results: {
+		family: string;
+		held_out_flows?: number;
+		skipped?: string;
+		recall_on_unseen?: Record<ModelName, number>;
+		false_positive_rate?: Record<ModelName, number>;
+	}[];
+};
+
+export type ValidationReport = {
+	duplicate_overlap: {
+		unique_flows: number;
+		total_flows: number;
+		test_rows: number;
+		test_rows_seen_in_train: number;
+		share_of_test_seen_in_train: number;
+		share_of_test_attacks_seen_in_train: number;
+	};
+	random_split: Record<ModelName, { recall: number; false_positive_rate: number }>;
+	time_ordered_split: Record<
+		ModelName,
+		{ recall: number; false_positive_rate: number }
+	>;
+};
+
+export function fetchReport<T>(name: string) {
+	return getJson<T>(`/api/reports/${name}`);
+}
+
 export function fetchModels() {
 	return getJson<ModelInfo[]>("/api/models");
 }
