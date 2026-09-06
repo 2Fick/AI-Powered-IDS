@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { formatCompactNumber } from "@/components/formater";
 import { fetchReplaySummary, type ReplaySummary } from "@/lib/ids-api";
 
-/** What the replay stream is drawing from, shown at the foot of the sidebar. */
+/**
+ * What the replay stream is drawing from.
+ *
+ * Kept to two lines: the sidebar has five pages to list and the footer was
+ * pushing the last two below the fold.
+ */
 export function DatasetCard() {
 	const [summary, setSummary] = useState<ReplaySummary | null>(null);
 
@@ -18,15 +23,11 @@ export function DatasetCard() {
 	return (
 		<div
 			className={cn(
-				"rounded-lg size-full min-h-24 border bg-background",
-				"relative flex flex-col gap-1 overflow-hidden px-4 pt-3 pb-3 *:text-nowrap",
+				"rounded-lg border bg-background px-3 py-2 *:text-nowrap",
 				"transition-opacity group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0"
 			)}
 		>
-			<span className="font-light font-mono text-[10px] text-muted-foreground">
-				REPLAY SOURCE
-			</span>
-			<p className="font-medium text-xs">CICIDS2017</p>
+			<p className="font-medium text-xs">CICIDS2017 replay</p>
 			<span className="text-[10px] text-muted-foreground">
 				{summary
 					? `${formatCompactNumber(summary.flows)} held out flows, ${formatCompactNumber(
