@@ -4,7 +4,6 @@ import {
 	Bar,
 	BarChart,
 	CartesianGrid,
-	Cell,
 	LabelList,
 	XAxis,
 	YAxis,
@@ -62,81 +61,6 @@ export type DatasetReport = {
 
 const BENIGN = "var(--chart-1)";
 const ATTACK = "var(--chart-4)";
-
-/**
- * How many flows each attack family has, on a logarithmic axis.
- *
- * The largest family has two hundred thousand times the flows of the smallest.
- * On a linear axis everything below the top three is an invisible sliver, and
- * the whole point of the chart is that the small ones exist.
- */
-export function ClassBalanceChart({
-	className,
-	id,
-}: {
-	className?: string;
-	id?: string;
-}) {
-	const report = useReport<DatasetReport>("dataset");
-
-	const config = {
-		flows: { label: "Flows", color: ATTACK },
-	} satisfies ChartConfig;
-
-	return (
-		<ReportCard
-			className={className}
-			command={DATA_COMMAND}
-			description="Flows per class, on a logarithmic scale. The largest class has two hundred thousand times the flows of the smallest, which is why accuracy means nothing on this dataset and the benchmark reports recall per family."
-			id={id}
-			report={report}
-			title="Class balance"
-		>
-			{(data) => {
-				const rows = data.families.map((row) => ({
-					family: row.family,
-					flows: row.flows,
-					fill: row.family === "BENIGN" ? BENIGN : ATTACK,
-				}));
-				return (
-					<ChartContainer className="h-80 w-full" config={config}>
-						<BarChart accessibilityLayer data={rows} layout="vertical">
-							<CartesianGrid horizontal={false} />
-							<XAxis
-								axisLine={false}
-								domain={[1, "dataMax"]}
-								label={{
-									value: "flows, logarithmic",
-									position: "insideBottom",
-									offset: -4,
-									style: { fill: "var(--muted-foreground)", fontSize: 11 },
-								}}
-								scale="log"
-								tickLine={false}
-								tickMargin={8}
-								type="number"
-							/>
-							<YAxis
-								axisLine={false}
-								dataKey="family"
-								tickLine={false}
-								tickMargin={8}
-								type="category"
-								width={172}
-							/>
-							<ChartTooltip content={<ChartTooltipContent hideLabel />} />
-							<Bar dataKey="flows" isAnimationActive={false} radius={3}>
-								{rows.map((row) => (
-									<Cell fill={row.fill} key={row.family} />
-								))}
-							</Bar>
-						</BarChart>
-					</ChartContainer>
-				);
-			}}
-		</ReportCard>
-	);
-}
 
 /** Benign against attack traffic in each of the eight capture sessions. */
 export function SessionMixChart({
@@ -252,7 +176,7 @@ export function FeatureSkewChart({
 					ratio: Math.round(row.max_over_p99),
 				}));
 				return (
-					<ChartContainer className="h-80 w-full" config={config}>
+					<ChartContainer className="h-72 w-full" config={config}>
 						<BarChart accessibilityLayer data={rows} layout="vertical">
 							<CartesianGrid horizontal={false} />
 							<XAxis
