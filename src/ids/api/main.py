@@ -2,13 +2,14 @@
 
 Endpoints:
 
-  GET  /api/health          liveness and what is loaded
-  GET  /api/models          the three models, their thresholds and settings
-  GET  /api/benchmark       the offline comparison report
-  GET  /api/replay/summary  what the live stream is about to replay
-  GET  /api/intel/{ip}      threat intelligence for one address
-  POST /api/predict         score a batch of flows
-  WS   /ws/stream           replay flows and score them live
+  GET  /api/health           liveness and what is loaded
+  GET  /api/models           the three models, their thresholds and settings
+  GET  /api/reports/{name}   benchmark, validation, sweeps, curves or novelty
+  GET  /api/benchmark        shorthand for the benchmark report
+  GET  /api/replay/summary   what the live stream is about to replay
+  GET  /api/intel/{ip}       threat intelligence for one address
+  POST /api/predict          score a batch of flows
+  WS   /ws/stream            replay flows and score them live
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ from ids.api.schemas import (
     PredictRequest,
     PredictResponse,
 )
-from ids.api.state import AppState
+from ids.api.state import REPORT_NAMES, AppState
 from ids.api.stream import ReplayEngine, run_stream, score_single_flow
 from ids.detectors import MODEL_KINDS, MODEL_LABELS
 from ids.settings import settings
@@ -92,6 +93,30 @@ async def models(state: AppState = Depends(get_state)) -> list[ModelInfo]:
         )
         for name, detector in state.bundle.detectors.items()
     ]
+
+
+@app.get("/api/reports")
+async def report_index(state: AppState = Depends(get_state)) -> dict:
+    """Which reports have been generated, so the dashboard can hide the rest."""
+    return {
+        name: state.reports.get(name) is not None for name in REPORT_NAMES
+    }
+
+
+@app.get("/api/reports/{name}")
+async def report(name: str, state: AppState = Depends(get_state)) -> dict:
+    if name not in REPORT_NAMES:
+        raise HTTPException(
+            status_code=404,
+            detail=f"unknown report, expected one of {', '.join(REPORT_NAMES)}",
+        )
+    content = state.reports.get(name)
+    if content is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"no {name} report yet, run: python -m ids.{name}",
+        )
+    return content
 
 
 @app.get("/api/benchmark")

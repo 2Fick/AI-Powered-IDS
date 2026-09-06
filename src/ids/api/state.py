@@ -18,25 +18,38 @@ from ids.intel.client import ThreatIntelClient
 from ids.settings import Settings
 
 
+# Reports the API serves as they are, each written by the command of the same
+# name. A missing one is normal on a fresh clone, the endpoint says so.
+REPORT_NAMES = ("benchmark", "validation", "sweeps", "curves", "novelty")
+
+
+def read_report(reports_dir: Path, name: str) -> dict | None:
+    path = Path(reports_dir) / f"{name}.json"
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 @dataclass
 class AppState:
     bundle: DetectorBundle
     replay: pd.DataFrame
-    benchmark: dict | None
+    reports: dict[str, dict | None]
     intel: ThreatIntelClient
     settings: Settings
+
+    @property
+    def benchmark(self) -> dict | None:
+        return self.reports.get("benchmark")
 
     @classmethod
     def load(cls, settings: Settings) -> "AppState":
         bundle = DetectorBundle.load(settings.models_dir)
         replay = load_split("replay", settings.processed_dir)
 
-        benchmark_path = Path(settings.reports_dir) / "benchmark.json"
-        benchmark = (
-            json.loads(benchmark_path.read_text(encoding="utf-8"))
-            if benchmark_path.exists()
-            else None
-        )
+        reports = {
+            name: read_report(settings.reports_dir, name) for name in REPORT_NAMES
+        }
 
         intel = ThreatIntelClient(
             virustotal_api_key=settings.virustotal_api_key,
@@ -46,7 +59,7 @@ class AppState:
         return cls(
             bundle=bundle,
             replay=replay,
-            benchmark=benchmark,
+            reports=reports,
             intel=intel,
             settings=settings,
         )
